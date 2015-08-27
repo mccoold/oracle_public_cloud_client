@@ -1,0 +1,4 @@
+#! /usr/bin/ruby
+require 'opc_client'
+dcs = DbaasClient.new
+puts dcs.dbservice_list(ARGV)

@@ -1,0 +1,4 @@
+#! /usr/bin/ruby
+require 'opc_client'
+jcs = JaasClient.new
+puts jcs.jaas_manage_client(ARGV)

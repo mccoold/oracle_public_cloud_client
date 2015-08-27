@@ -1,0 +1,4 @@
+#! /usr/bin/ruby
+require 'opc_client'
+Inf =IaasClient.new
+puts Inf.container_delete(ARGV)

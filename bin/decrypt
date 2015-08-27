@@ -1,0 +1,4 @@
+#! /usr/bin/ruby
+require 'opc_client'
+x = IaasClient.new
+puts x.decrypt_content_upload(ARGV)
