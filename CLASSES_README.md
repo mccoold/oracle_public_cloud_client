@@ -5,11 +5,14 @@
 	* create:
 	* srvice_list (deprecated)
 	* delete:
-	* jaas_manage:
+	* jaas_manage_client:
 	* inst_list: 
 
+** dbaasClient **
+	
+	* create:
+	* delete:
+	* dbservice_list:
+	* dbaas_manage_client:
 
 
-dbaasClient
-
-create 

@@ -104,6 +104,7 @@ class InputParse < OpcClient
       opts.on('-I', '--inst INST', 'Instance name') { |v| options[:inst] = v }
       opts.on('-T', '--timeout TIMEOUT', 'Instance name') { |v| options[:timeout] = v }
       opts.on('-n', '--cluster_name CLUSTER', 'cluster name') { |v| options[:cluster_id] = v }
+      opts.on('--patch_id PATCH_ID', 'patch id') { |v| options[:patch_id] = v }
       opts.on('-s', '--server SERVERID', 'server to be scaled in') { |v| options[:serverid] = v }
       opts.on('-A', '--action ACTION', 'action options, stop, start, restart') { |v| options[:action] = v }
       opts.on('-h', '--help', 'Display this screen') do

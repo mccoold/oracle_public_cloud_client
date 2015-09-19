@@ -25,7 +25,7 @@ class Utilities < OpcClient
         result = result.inst_list("#{options[:id_domain]}", "#{options[:user_name]}",
                                   "#{options[:passwd]}", "#{options[:inst]}")
         if caller.nil?
-          JSON.pretty_generate(JSON.parse(result.body)) unless result.code == '401' or result.code == '404'
+          puts JSON.pretty_generate(JSON.parse(result.body)) unless result.code == '401' or result.code == '404'
           print 'error, JSON was not returned  the http response code was ' + result.code if result.code == '401' or result.code == '404' 
         elsif caller == 'db'
           unless result.code == '401' or result.code == '404'

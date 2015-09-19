@@ -5,14 +5,14 @@
 * This is the function tool set for the Oracle public cloud.  This tool will allow you to have 
 command line functions proioning and maintaining cloud elements in the Oracle public cloud.  
 The gem handles both the IaaS and PaaS(JaaS, DBaaS) functinality
-* Version 0.0.1
+* Version 0.0.2
 
 ### Setup and Dependencies ###
 **
 * Summary of set up**:  Install dependencies, install Gem, read usage file
 
 + **Dependencies:** 
-    *  OPC-0.0.1
+    *  OPC-0.1.0
     * json(any verion)
     * http
     * rubygems
@@ -24,8 +24,8 @@ The gem handles both the IaaS and PaaS(JaaS, DBaaS) functinality
 if a required option is not provided they will return an error asking for the required option.
 
       * **Examples:**  
-        * jasslist -i *youridentitydomain* -u *username* -p *password* > returns a list of all jcs instances for that account
-        * jasslist -i *youridentitydomain* -u *username* -p *password* -I *Instance Service Name*  >> returns details on a specific Java Instance
+        * jaaslist -i *youridentitydomain* -u *username* -p *password* > returns a list of all jcs instances for that account
+        * jaaslist -i *youridentitydomain* -u *username* -p *password* -I *Instance Service Name*  >> returns details on a specific Java Instance
 	
 
 ### Class and Method Descriptions ###

@@ -92,8 +92,8 @@ class JaasClient < OpcClient
                                      "#{options[:id_domain]}", "#{options[:user_name]}", "#{options[:passwd]}")
         result['location']
       when 'scaleup'
-        result = instmanage.scale_up("#{options[:id_domain]}", "#{options[:inst]}", "#{options[:cluster_id]}",
-                                     "#{options[:user_name]}", "#{options[:passwd]}")
+        result = instmanage.scale_up("#{options[:inst]}", "#{options[:cluster_id]}",
+                                     "#{options[:id_domain]}","#{options[:user_name]}", "#{options[:passwd]}")
         if result.code == '202'
           result = JSON.parse(result.body)
           JSON.pretty_generate(result)
@@ -102,16 +102,61 @@ class JaasClient < OpcClient
         end # end of if
       when 'scalein'
         puts "#{options[:serverid]}"
-        result = instmanage.scale_in("#{options[:id_domain]}", "#{options[:inst]}", "#{options[:serverid]}",
-                                     "#{options[:user_name]}", "#{options[:passwd]}")
+        result = instmanage.scale_in("#{options[:inst]}", "#{options[:serverid]}",
+                                     "#{options[:id_domain]}", "#{options[:user_name]}", "#{options[:passwd]}")
         if result.code == '202'
           result = JSON.parse(result.body)
           JSON.pretty_generate(result)
         else
           result.body
         end # end of if
-      else
-        puts 'Invalid selection for action option ' + "#{options[:action]}"
+      when 'avail_patches'
+        result = instmanage.available_patches("#{options[:inst]}", "#{options[:id_domain]}",
+                                              "#{options[:user_name]}", "#{options[:passwd]}")
+        if result.code == '200'
+          result = JSON.parse(result.body)
+          JSON.pretty_generate(result)
+        else
+          result.body
+        end # end of if
+      when 'applied_patches'
+        result = instmanage.applied_patches("#{options[:inst]}", "#{options[:id_domain]}",
+                                            "#{options[:user_name]}", "#{options[:passwd]}")
+        if result.code == '200'
+          result = JSON.parse(result.body)
+          JSON.pretty_generate(result)
+        else
+          result.body
+        end # end of if
+      when 'patch_precheck'
+        result = instmanage.patch_precheck("#{options[:inst]}", "#{options[:patch_id]}", "#{options[:id_domain]}",
+                                            "#{options[:user_name]}", "#{options[:passwd]}")
+        if result.code == '200'
+          result = JSON.parse(result.body)
+          JSON.pretty_generate(result)
+        else
+          result.body
+        end # end of if
+      when 'patch'
+        result = instmanage.patch("#{options[:inst]}", "#{options[:patch_id]}", "#{options[:id_domain]}",
+                                            "#{options[:user_name]}", "#{options[:passwd]}")
+        if result.code == '200'
+          result = JSON.parse(result.body)
+          JSON.pretty_generate(result)
+        else
+          result.body
+        end # end of if
+      when 'patch_rollback'
+        result = instmanage.patch_rollback("#{options[:inst]}", "#{options[:patch_id]}", "#{options[:id_domain]}",
+                                            "#{options[:user_name]}", "#{options[:passwd]}")
+        if result.code == '200'
+          result = JSON.parse(result.body)
+          JSON.pretty_generate(result)
+        else
+          result.body
+        end # end of if
+      else 
+        puts 'Invalid selection for action option ' + "#{options[:action]}"    
       end # end of case
     end # end of validator
   end  # end of method manage
