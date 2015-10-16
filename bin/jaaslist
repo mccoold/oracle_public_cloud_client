@@ -1,4 +1,0 @@
-#!/usr/bin/ruby
-require 'opc_client'
-jcs = JaasClient.new
-puts jcs.srvice_list(ARGV)

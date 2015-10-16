@@ -15,31 +15,31 @@
 #
 class DataGridClient < OpcClient
   #
-  require 'OPC/Jaas/datagrid'
+  require 'opc/paas/jcs/datagrid'
   #
   def create(args)
     inputparse =  InputParse.new(args)
     options = inputparse.create
     dgcreate = InstCreate.new
-    createcall = dgcreate.create("#{options[:inst]}", "#{options[:id_domain]}", "#{options[:user_name]}", "#{options[:passwd]}")
+    createcall = dgcreate.create(options[:inst], options[:id_domain], options[:user_name], options[:passwd])
     if createcall.code == '400'
       puts 'error'
       puts createcall.body
     else
-      res = dgcreate.create_status(createcall['location'], "#{options[:id_domain]}", "#{options[:user_name]}",
-                                   "#{options[:passwd]}")
+      res = dgcreate.create_status(createcall['location'], options[:id_domain], options[:user_name],
+                                   options[:passwd])
       puts 'building ' + res['service_name']
       if options[:track]
         while res['status'] == 'In Progress'
           print '.'
           sleep 25
-          res = dgcreate.create_status(createcall['location'], "#{options[:id_domain]}", "#{options[:user_name]}",
-                                       "#{options[:passwd]}")
+          res = dgcreate.create_status(createcall['location'], options[:id_domain], options[:user_name],
+                                       options[:passwd])
           res = JSON.parse(res)
         end # end of while
         result = SrvList.new
         puts res['service_name']
-        result = result.inst_list("#{options[:id_domain]}", "#{options[:user_name]}", "#{options[:passwd]}", res['service_name'])
+        result = result.inst_list(options[:id_domain], options[:user_name], options[:passwd], res['service_name'])
         result = JSON.parse(result)
         result = JSON.pretty_generate(result)
         puts "#{result}"

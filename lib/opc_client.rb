@@ -16,14 +16,22 @@
 #
 class OpcClient
   require 'OPC'
-  require 'opc_client/jaasClient'
-  require 'opc_client/iaasClient'
+  require 'opc_client/jcs_client'
+  require 'opc_client/list'
+  require 'opc_client/network'
+  require 'opc_client/seclist_client'
+  require 'opc_client/paas_client'
+  require 'opc_client/object_storage_client'
   require 'optparse'
-  require 'opc_client/datagridclient'
-  require 'opc_client/dbaasClient'
-  require 'opc_client/backupmgrclient'
+  require 'opc_client/datagrid_client'
+  require 'opc_client/dbcs_client'
+  require 'opc_client/backupmgr_client'
   require 'opc_client/inputparse'
   require 'opc_client/validator'
   require 'opc_client/util'
+  require 'opc_client/compute_client'
+  require 'opc_client/secrule_client'
+  require 'opc_client/secapp_client'
+  require 'opc_client/block_storage_client'
  end
  

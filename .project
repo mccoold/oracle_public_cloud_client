@@ -3,7 +3,7 @@
 	<name>opcrubyclient</name>
 	<comment></comment>
 	<projects>
-		<project>OPC</project>
+		<project>opc</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

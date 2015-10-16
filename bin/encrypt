@@ -1,4 +1,4 @@
 #! /usr/bin/ruby
 require 'opc_client'
-x = IaasClient.new
-puts x.encrypt_content_upload(ARGV)
+enc_object = Utilities.new
+puts env_object.encrypt_content_upload(ARGV)

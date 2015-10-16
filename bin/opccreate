@@ -1,5 +1,5 @@
 #! /usr/bin/ruby
 
 require 'opc_client'
-build = JaasClient.new
+build = PaasClient.new
 puts build.create(ARGV)

@@ -14,8 +14,7 @@
 # limitations under the License.
 #
 class BackUpClient < OpcClient
-  #
-  require 'OPC/Jaas/backupmanager'
+  require 'opc/paas/jcs/backupmanager'
 
   def jcsbackup_list(args)
     inputparse =  InputParse.new(args)
@@ -28,13 +27,13 @@ class BackUpClient < OpcClient
     else
       result = BackUpManager.new
       if options[:backup_id].nil?
-        result = result.backup_list("#{options[:inst]}", nil, "#{options[:id_domain]}",
-                                    "#{options[:user_name]}", "#{options[:passwd]}")
+        result = result.backup_list(options[:inst], nil, options[:id_domain],
+                                    options[:user_name], options[:passwd])
       else
-        result = result.backup_list("#{options[:inst]}", "#{options[:backup_id]}", "#{options[:id_domain]}",
-                                    "#{options[:user_name]}", "#{options[:passwd]}")
+        result = result.backup_list(options[:inst], options[:backup_id], options[:id_domain],
+                                    options[:user_name], options[:passwd])
       end
-      if result.code == 401 || 400 || 404
+      if result.code == '401' || result.code == '400' || result.code == '404'
         puts 'error, JSON was not returned  the http response code was' + result.code
       else
         JSON.pretty_generate(JSON.parse(result.body))
@@ -52,9 +51,9 @@ class BackUpClient < OpcClient
       puts valid.at(1)
     else
       result = BackUpManager.new
-      result = result.backup_config_list("#{options[:inst]}", "#{options[:id_domain]}",
-                                         "#{options[:user_name]}", "#{options[:passwd]}")
-      if result.code == 401 || 400 || 404
+      result = result.backup_config_list(options[:inst], options[:id_domain],
+                                         options[:user_name], options[:passwd])
+      if result.code == '401' || result.code == '400' || result.code == '404'
         puts 'error, JSON was not returned  the http response code was'
         puts result.code
       else

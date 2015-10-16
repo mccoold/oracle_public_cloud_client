@@ -1,4 +1,4 @@
 #! /usr/bin/ruby
 require 'opc_client'
-x = IaasClient.new
-puts x.content_upload(ARGV)
+content = ObjectStorageClient.new
+puts content.content_upload(ARGV)

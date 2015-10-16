@@ -1,0 +1,4 @@
+#! /usr/bin/ruby
+require 'opc_client'
+network = SecRuleClient.new
+puts network.secrule_update(ARGV)

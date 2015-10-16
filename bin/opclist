@@ -1,0 +1,4 @@
+#!/usr/bin/ruby
+require 'opc_client'
+opc = PaasList.new
+puts opc.srvice_list(ARGV)

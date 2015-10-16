@@ -14,51 +14,16 @@
 # limitations under the License.
 #
 class Utilities < OpcClient
-  def util_service_list(options, caller, function)
-    result = function.new
-    if options[:inst]
-      if options[:mang]
-        result = result.managed_list("#{options[:id_domain]}", "#{options[:user_name]}",
-                                     "#{options[:passwd]}", "#{options[:inst]}")
-        puts JSON.pretty_generate(result)
-      else # inside else
-        result = result.inst_list("#{options[:id_domain]}", "#{options[:user_name]}",
-                                  "#{options[:passwd]}", "#{options[:inst]}")
-        if caller.nil?
-          puts JSON.pretty_generate(JSON.parse(result.body)) unless result.code == '401' or result.code == '404'
-          print 'error, JSON was not returned  the http response code was ' + result.code if result.code == '401' or result.code == '404' 
-        elsif caller == 'db'
-          unless result.code == '401' or result.code == '404'
-            results = JSON.parse(result.body)
-            ssh_host = (results['glassfish_url'])
-            ssh_host.delete! 'https://'
-            ssh_host.slice!("4848")
-            puts "#{ssh_host}"
-            puts results = JSON.pretty_generate(results)
-          end # end of unless
-          print 'error, JSON was not returned  the http response code was ' + result.code if result.code == '401' or result.code == '404'
-        else
-          puts 'what are you sending? It is not correct'
-        end # end of little if here
-      end # end of manage if 
-    else
-      result = result.service_list("#{options[:id_domain]}", "#{options[:user_name]}", "#{options[:passwd]}") 
-      puts result.code
-      print 'error, JSON was not returned  the http response code was ' + result.code if (result.code == '401' or result.code == '404')
-      JSON.pretty_generate(JSON.parse(result.body)) unless result.code == '401' or result.code == '404'
-    end # end of inst if
-  end # end of method
-
   def create_result(options, createcall, function, caller)
-    res = JSON.parse(function.create_status(createcall['location'], "#{options[:id_domain]}",
-                                            "#{options[:user_name]}", "#{options[:passwd]}"))
+    res = JSON.parse(function.create_status(createcall['location'], options[:id_domain],
+                                            options[:user_name], options[:passwd]))
     puts 'building ' + res['service_name']
     if options[:track]
       while res['status'] == 'In Progress'
         print '.'
         sleep 25
-        res = JSON.parse(function.create_status(createcall['location'], "#{options[:id_domain]}",
-                                                "#{options[:user_name]}", "#{options[:passwd]}"))
+        res = JSON.parse(function.create_status(createcall['location'], options[:id_domain],
+                                                options[:user_name], options[:passwd]))
       end # end of while
       if "#{caller}" == 'db'
         result = DbServiceList.new
@@ -69,9 +34,28 @@ class Utilities < OpcClient
         puts "#{caller}"
       end
       puts res['service_name']
-      result = result.inst_list("#{options[:id_domain]}", "#{options[:user_name]}",
-                                "#{options[:passwd]}", res['service_name'])
-      JSON.pretty_generate(JSON.parse(result.body))
+      result = result.inst_list(options[:id_domain], options[:user_name],
+                                options[:passwd], res['service_name'])
+      puts JSON.pretty_generate(JSON.parse(result.body))
     end # end of track if
+  end # end of method
+
+  def encrypt_content_upload(args)
+    inputparse =  InputParse.new(args)
+    options = inputparse.storage_create
+    attrcheck = {
+      'object'    => options[:object_name],
+      'file name' => options[:file_name] }
+    validate = Validator.new
+    valid = validate.attrvalidate(options, attrcheck)
+    if valid.at(0) == 'true'
+      puts valid.at(1)
+    else
+      encryptobject = Encrypt.new
+      encryptobject.encrypt(options[:object_name], options[:file_name],
+                            options[:id_domain], options[:user_name], options[:passwd]) if options[:action] == 'encrypt'
+      encryptobject.decrypt(options[:object_name], options[:file_name],
+                            options[:id_domain], options[:user_name], options[:passwd]) if options[:action] == 'decrypt'
+    end # end of validator
   end # end of method
 end # end of class

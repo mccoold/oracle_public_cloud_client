@@ -1,4 +1,4 @@
 #! /usr/bin/ruby
 require 'opc_client'
-dbcs = DbaasClient.new
+dbcs = PaasClient.new
 puts dbcs.delete(ARGV)

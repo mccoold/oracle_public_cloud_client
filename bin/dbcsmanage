@@ -1,4 +1,4 @@
 #! /usr/bin/ruby
 require 'opc_client'
-dbcs = DbaasClient.new
+dbcs = DbcsClient.new
 puts dbcs.dbaas_manage_client(ARGV)
