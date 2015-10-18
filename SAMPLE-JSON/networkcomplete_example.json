@@ -1,0 +1,64 @@
+{
+	"SecApp" : 
+  	{
+	    "Action" : "create", 
+	    "Parameters" : 
+    	{
+      		"protocol" : "<protocol>",
+    		"name" : "/Compute-usoracle24034/daryn.mccool@oracle.com/<Name>",
+    		"uri" : null,
+    		"icmptype" : "",
+    		"dport" : "<port>",
+    		"icmpcode" : ""
+  		}
+  	},
+
+	"SecRule" :
+	{
+		"Action" : "create", 
+	    "Parameters" : 
+		{
+			"dst_list" : "seclist:/Compute-<Id_domain>/<username>/jaas/JCSDemo/wls/ora_admin",
+			"name": "/Compute-<Id_domain>/<username>/<Rule name>",
+			"src_list" : "seciplist:/oracle/public/public-internet",
+			"uri" : null,
+			"disabled" : null,
+			"application" : "/Compute-<Id_domain>/<username>/<SecApp Name>",
+			"action" : "PERMIT"
+	  }
+	},
+
+	"SecList" :
+	{
+		"Action" : "create", 
+	    "Parameters" :
+		{
+		  "account": "/Compute-<Id_domain>/default",
+	      "description": "<description>",
+	      "uri": "https://api-z15.compute.us2.oraclecloud.com/seclist/Compute-<Id_domain>/<username>/<SecList Name>",
+	      "outbound_cidr_policy": "PERMIT",
+	      "policy": "DENY",
+	      "group_id": "",
+	      "id": "",
+	      "name": "/Compute-<Id_domain>/<username>/<SecList Name>"
+	    }
+
+	},
+	"IP" :
+	{
+		"Class" : "association",
+		"Action" : "create", 
+	    "Parameters" :
+		{
+		  "account": "/Compute-<Id_domain>/default",
+	      "description": "<description>",
+	      "uri": "https://api-z15.compute.us2.oraclecloud.com/seclist/Compute-<Id_domain>/<username>/<SecList Name>",
+	      "outbound_cidr_policy": "PERMIT",
+	      "policy": "DENY",
+	      "group_id": "",
+	      "id": "",
+	      "name": "/Compute-<Id_domain>/<username>/<SecList Name>"
+	    }
+
+	}
+}
