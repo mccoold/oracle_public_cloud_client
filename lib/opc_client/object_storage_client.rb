@@ -14,16 +14,6 @@
 # limitations under the License
 #
 class ObjectStorageClient < OpcClient
-  #
-#  require 'OPC/Iaas/objectstorage'
- # require 'OPC/Util/encrypt'
-
-  def storage_token(args)
-    inputparse =  InputParse.new(args)
-    options = inputparse.storagecreate
-    ObjectStorage.getToken(options[:id_domain], options[:user_name], options[:passwd])
-  end
-
   def storage_create(args)
     inputparse =  InputParse.new(args)
     options = inputparse.storage_create
@@ -34,9 +24,8 @@ class ObjectStorageClient < OpcClient
     if valid.at(0) == 'true'
       puts valid.at(1)
     else
-      newcontainer = ObjectStorage.new
-      newcontainer = newcontainer.create(options[:id_domain], options[:user_name],
-                                         options[:passwd], options[:container])
+      newcontainer = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
+      newcontainer = newcontainer.create(options[:container])
       if newcontainer.code == '201'
         puts newcontainer.code
         puts "Container #{options[:container]} created"
@@ -56,9 +45,8 @@ class ObjectStorageClient < OpcClient
       puts valid.at(1)
     else
       if options[:container]
-        containerview = ObjectStorage.new
-        containerview = containerview.contents(options[:id_domain], options[:user_name],
-                                               options[:passwd], options[:container])
+        containerview = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
+        containerview = containerview.contents(options[:container])
         if containerview.code == '201'
           puts containerview.code
           puts containerview.body
@@ -66,8 +54,8 @@ class ObjectStorageClient < OpcClient
           puts containerview.body
         end # end of inside if
       else
-        newcontainer = ObjectStorage.new
-        newcontainer = newcontainer.list(options[:id_domain], options[:user_name], options[:passwd])
+        newcontainer = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
+        newcontainer = newcontainer.list
         if newcontainer.code == '201'
           puts newcontainer.code
           puts newcontainer.body
@@ -88,9 +76,8 @@ class ObjectStorageClient < OpcClient
     if valid.at(0) == 'true'
       puts valid.at(1)
     else
-      containerview = ObjectStorage.new
-      containerview = containerview.delete(options[:id_domain], options[:user_name],
-                                           options[:passwd], options[:container])
+      containerview = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
+      containerview = containerview.delete(options[:container])
       if containerview.code == '201'
         puts containerview.code
         # puts "Container #{options[:container]} created"
@@ -112,9 +99,9 @@ class ObjectStorageClient < OpcClient
     if valid.at(0) == 'true'
       puts valid.at(1)
     else
-      newcontent = ObjectStorage.new
+      newcontent = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
       newcontent = newcontent.object_create(options[:file_name], options[:container], options[:object_name],
-                                            options[:file_type], options[:id_domain], options[:user_name], options[:passwd])
+                                            options[:file_type])
       if newcontent.code == '201'
         puts newcontent.code
         puts "Object #{options[:file_name]} has been created in container #{options[:container]}"

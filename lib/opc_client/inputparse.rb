@@ -89,7 +89,7 @@ class InputParse < OpcClient
       opts.on('-f', '--file_name FILE_NAME', 'file to upload') { |v| options[:file_name] = v }
       opts.on('--file_type FILE_TYPE', 'http file or application type') { |v| options[:file_type] = v }
       opts.on('--public_key PUBLIC_KEY', 'RSA Public Key file') { |v| options[:public_key] = v }
-      opts.on('-O', '--object_name OBJECT_NAME', 'filena,e to create') { |v| options[:object_name] = v }
+      opts.on('-O', '--object_name OBJECT_NAME', 'filename to create') { |v| options[:object_name] = v }
       opts.on('-h', '--help', 'Display this screen') do
         puts opts
         exit

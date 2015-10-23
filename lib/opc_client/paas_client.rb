@@ -34,7 +34,7 @@ class PaasClient < OpcClient
         puts createcall.code
         puts createcall.body
       else
-        function = jcscreate
+        function = opccreate
         util = Utilities.new
         util.create_result(options, createcall, function, 'jcs')
       end # end of main if
@@ -52,9 +52,11 @@ class PaasClient < OpcClient
     else
       deleteconfig = File.read(options[:config]) if options[:action] == 'jcs'
       data_hash = JSON.parse(deleteconfig) if options[:action] == 'jcs'
-      deleteinst = InstDelete.new
-      JSON.pretty_generate(JSON.parse(deleteinst.delete(options[:action], data_hash, options[:inst]))) if options[:action] == 'jcs'
-      JSON.pretty_generate(JSON.parse(deleteinst.delete(options[:action], options[:inst]))) if options[:action] == 'dbcs'                                               
+      deleteinst = InstDelete.new(options[:id_domain], options[:user_name], options[:passwd])
+      puts JSON.pretty_generate(JSON.parse(deleteinst.delete(options[:action], data_hash,
+                                                        options[:inst]))) if options[:action] == 'jcs'
+      puts JSON.retty_generate(JSON.parse(deleteinst.delete(options[:action], nil,
+                                                        options[:inst]))) if options[:action] == 'dbcs'
     end # end of validator
   end   # end of method
 end # end of class

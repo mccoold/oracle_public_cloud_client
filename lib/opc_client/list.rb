@@ -49,10 +49,10 @@ class PaasListUtil < OpcClient # search util class
 
   def inst_jcs(result)
     if @options[:mang]
-      result = result.managed_list(@options[:action], @options[:inst])
+      result = result.managed_list(@options[:inst])
       puts JSON.pretty_generate(result)
     else # inside mang else
-      result = result.inst_list(@options[:action],  @options[:inst])                     
+      result = result.inst_list(@options[:action],  @options[:inst])
       if @options[:action] == 'jcs'
         puts JSON.pretty_generate(JSON.parse(result.body)) unless result.code == '401' || result.code == '404'
         print 'error, JSON was not returned  the http response code was ' +

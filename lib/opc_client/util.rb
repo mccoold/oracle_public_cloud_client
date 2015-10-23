@@ -15,27 +15,17 @@
 #
 class Utilities < OpcClient
   def create_result(options, createcall, function, caller)
-    res = JSON.parse(function.create_status(createcall['location'], options[:id_domain],
-                                            options[:user_name], options[:passwd]))
+    res = JSON.parse(function.create_status(createcall['location']))
     puts 'building ' + res['service_name']
     if options[:track]
       while res['status'] == 'In Progress'
         print '.'
         sleep 25
-        res = JSON.parse(function.create_status(createcall['location'], options[:id_domain],
-                                                options[:user_name], options[:passwd]))
+        res = JSON.parse(function.create_status(createcall['location']))
       end # end of while
-      if "#{caller}" == 'db'
-        result = DbServiceList.new
-      elsif "#{caller}" == 'jcs'
-        result = SrvList.new
-      else
-        print 'in the else, something went wrong'
-        puts "#{caller}"
-      end
+      result = SrvList.new(options[:id_domain], options[:user_name], options[:passwd])
       puts res['service_name']
-      result = result.inst_list(options[:id_domain], options[:user_name],
-                                options[:passwd], res['service_name'])
+      result = result.inst_list(res['service_name'])
       puts JSON.pretty_generate(JSON.parse(result.body))
     end # end of track if
   end # end of method

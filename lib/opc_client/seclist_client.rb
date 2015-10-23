@@ -28,7 +28,7 @@ class SecListClient < OpcClient
     else
       options[:action].downcase
       if options[:action] == 'list' || options[:action] == 'details'
-        networkconfig = SecIPList.new(options[:id_domain], options[:user_name], options[:passwd])
+        networkconfig = SecList.new(options[:id_domain], options[:user_name], options[:passwd])
         networkconfig = networkconfig.discover(options[:rest_endpoint], options[:container], options[:action])
         puts JSON.pretty_generate(JSON.parse(networkconfig.body))
       else
