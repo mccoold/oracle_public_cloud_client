@@ -23,9 +23,9 @@
       "nodeManagerPort": "6555",
       "nodeManagerUserName": "nodeMangerAdmin",
       "nodeManagerPassword": "<password>",
-      "dbServiceName": "<name>",
+      "dbServiceName": "<dbname>",
       "dbaName": "SYS",
-      "dbaPassword": "<dbaPassword>",
+      "dbaPassword": "<dbPassword>",
       "shape": "oc3",
       "VMsPublicKey": "<ssh_key>"
     }
