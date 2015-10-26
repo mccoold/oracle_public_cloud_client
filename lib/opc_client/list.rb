@@ -20,12 +20,9 @@ class PaasList < OpcClient
     attrcheck = nil
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
-    if valid.at(0) == 'true'
-      puts valid.at(1)
-    else
-      util = PaasListUtil.new(options)
-      util.util_service_list(SrvList)
-    end # end of validator if
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    util = PaasListUtil.new(options)
+    util.util_service_list(SrvList)
   end  # end of method list
 end # end of class
 

@@ -22,23 +22,21 @@ class PaasClient < OpcClient
       'Action'        => options[:action] }
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
-    if valid.at(0) == 'true'
-      puts valid.at(1)
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    file = File.read(options[:create_json])
+    data_hash = JSON.parse(file)
+    opccreate = InstCreate.new(options[:id_domain], options[:user_name], options[:passwd])
+    createcall = opccreate.create(data_hash, options[:action])
+    if createcall.code == '400' || createcall.code == '404' || createcall.code == '401'
+      puts 'Error with the REST Call'
+      puts createcall.code
+      puts createcall.body
     else
-      file = File.read(options[:create_json])
-      data_hash = JSON.parse(file)
-      opccreate = InstCreate.new(options[:id_domain], options[:user_name], options[:passwd])
-      createcall = opccreate.create(data_hash, options[:action])
-      if createcall.code == '400' || createcall.code == '404' || createcall.code == '401'
-        puts 'Error with the REST Call'
-        puts createcall.code
-        puts createcall.body
-      else
-        function = opccreate
-        util = Utilities.new
-        util.create_result(options, createcall, function, 'jcs')
-      end # end of main if
-    end # end of validator if
+      function = opccreate
+      util = Utilities.new
+      util.create_result(options, createcall, function, 'jcs')
+    end # end of main if
+    # end # end of validator if
   end  # end create method
 
   def delete(args)
@@ -47,16 +45,13 @@ class PaasClient < OpcClient
     attrcheck = { 'Instance' => options[:inst] }
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
-    if valid.at(0) == 'true'
-      puts valid.at(1)
-    else
-      deleteconfig = File.read(options[:config]) if options[:action] == 'jcs'
-      data_hash = JSON.parse(deleteconfig) if options[:action] == 'jcs'
-      deleteinst = InstDelete.new(options[:id_domain], options[:user_name], options[:passwd])
-      puts JSON.pretty_generate(JSON.parse(deleteinst.delete(options[:action], data_hash,
-                                                        options[:inst]))) if options[:action] == 'jcs'
-      puts JSON.retty_generate(JSON.parse(deleteinst.delete(options[:action], nil,
-                                                        options[:inst]))) if options[:action] == 'dbcs'
-    end # end of validator
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    deleteconfig = File.read(options[:config]) if options[:action] == 'jcs'
+    data_hash = JSON.parse(deleteconfig) if options[:action] == 'jcs'
+    deleteinst = InstDelete.new(options[:id_domain], options[:user_name], options[:passwd])
+    puts JSON.pretty_generate(JSON.parse(deleteinst.delete(options[:action], data_hash,
+                                                           options[:inst]))) if options[:action] == 'jcs'
+    puts JSON.retty_generate(JSON.parse(deleteinst.delete(options[:action], nil,
+                                                          options[:inst]))) if options[:action] == 'dbcs'
   end   # end of method
 end # end of class

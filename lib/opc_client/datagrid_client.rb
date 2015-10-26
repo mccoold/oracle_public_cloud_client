@@ -14,20 +14,16 @@
 # limitations under the License.
 #
 class DataGridClient < OpcClient
-  #
-  require 'opc/paas/jcs/datagrid'
-  #
   def create(args)
     inputparse =  InputParse.new(args)
     options = inputparse.create
-    dgcreate = InstCreate.new
-    createcall = dgcreate.create(options[:inst], options[:id_domain], options[:user_name], options[:passwd])
+    dgcreate = DataGrid.new(options[:id_domain], options[:user_name], options[:passwd])
+    createcall = dgcreate.create(options[:inst])
     if createcall.code == '400'
       puts 'error'
       puts createcall.body
     else
-      res = dgcreate.create_status(createcall['location'], options[:id_domain], options[:user_name],
-                                   options[:passwd])
+      res = dgcreate.create_status(createcall['location'])
       puts 'building ' + res['service_name']
       if options[:track]
         while res['status'] == 'In Progress'
@@ -37,12 +33,9 @@ class DataGridClient < OpcClient
                                        options[:passwd])
           res = JSON.parse(res)
         end # end of while
-        result = SrvList.new
-        puts res['service_name']
-        result = result.inst_list(options[:id_domain], options[:user_name], options[:passwd], res['service_name'])
-        result = JSON.parse(result)
-        result = JSON.pretty_generate(result)
-        puts "#{result}"
+        result = SrvList.new(options[:id_domain], options[:user_name], options[:passwd])
+        result = result.inst_list(res['service_name']) 
+        JSON.pretty_generate(JSON.parse(result))
       end # end of track if
     end # end of main if
   end  # end create method

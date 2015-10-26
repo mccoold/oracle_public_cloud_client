@@ -22,13 +22,10 @@ class ComputeClient < OpcClient
       'Container' => options[:container] }
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
-    if valid.at(0) == 'true'
-      puts valid.at(1)
-    else
-      instanceconfig = Instance.new
-      instanceconfig = instanceconfig.list(options[:rest_endpoint], options[:container], options[:id_domain],
-                                           options[:user_name], options[:passwd])
-      puts JSON.pretty_generate(JSON.parse(instanceconfig.body))
-    end # end of validator
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    instanceconfig = Instance.new
+    instanceconfig = instanceconfig.list(options[:rest_endpoint], options[:container], options[:id_domain],
+                                         options[:user_name], options[:passwd])
+    puts JSON.pretty_generate(JSON.parse(instanceconfig.body))
   end # end of method
 end # end of class

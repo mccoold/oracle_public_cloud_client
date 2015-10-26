@@ -25,18 +25,15 @@ class BlockStorageClient < OpcClient
       'Container' => options[:container] }
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
-    if valid.at(0) == 'true'
-      puts valid.at(1)
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    options[:action].downcase
+    if options[:action] == 'list' || options[:action] == 'details'
+      storageconfig = BlockStorage.new(options[:id_domain], options[:user_name], options[:passwd])
+      storageconfig = storageconfig.list(options[:rest_endpoint], options[:container], options[:action])
+      puts JSON.pretty_generate(JSON.parse(storageconfig.body))
     else
-      options[:action].downcase
-      if options[:action] == 'list' || options[:action] == 'details'
-        storageconfig = BlockStorage.new(options[:id_domain], options[:user_name], options[:passwd])
-        storageconfig = storageconfig.list(options[:rest_endpoint], options[:container], options[:action])
-        puts JSON.pretty_generate(JSON.parse(storageconfig.body))
-      else
-        puts 'invalid entry for action, please use details or list'
-      end # end of if
-    end # end of validator
+      puts 'invalid entry for action, please use details or list'
+    end # end of if
   end # end of method
 
   def update(args)
@@ -47,23 +44,20 @@ class BlockStorageClient < OpcClient
       'Container' => options[:container] }
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
-    if valid.at(0) == 'true'
-      puts valid.at(1)
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    storageconfig = BlockStorage.new(options[:id_domain], options[:user_name], options[:passwd])
+    case options[:action]
+    when 'create'
+      file = File.read(options[:create_json])
+      update = JSON.parse(file)
+      storageupdate = storageconfig.update(options[:rest_endpoint], options[:action], update)
+      JSON.pretty_generate(JSON.parse(storageupdate.body))
+    when 'delete'
+      storageupdate = storageconfig.secrule_update(options[:rest_endpoint], options[:container],
+                                                   options[:action])
+      JSON.pretty_generate(JSON.parse(storageupdate.body))
     else
-      storageconfig = BlockStorage.new(options[:id_domain], options[:user_name], options[:passwd])
-      case options[:action]
-      when 'create'
-        file = File.read(options[:create_json])
-        update = JSON.parse(file)
-        storageupdate = storageconfig.update(options[:rest_endpoint], options[:action], update)
-        JSON.pretty_generate(JSON.parse(storageupdate.body))
-      when 'delete'
-        storageupdate = storageconfig.secrule_update(options[:rest_endpoint], options[:container],
-                                                     options[:action])
-        JSON.pretty_generate(JSON.parse(storageupdate.body))
-      else
-        puts 'invalid entry'
-      end # end of case
-    end # end of validator
+      puts 'invalid entry'
+    end # end of case
   end # end of method
 end

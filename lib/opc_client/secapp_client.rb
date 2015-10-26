@@ -31,22 +31,19 @@ class SecAppClient < OpcClient
       'Container' => options[:container] }
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
-    if valid.at(0) == 'true'
-      puts valid.at(1)
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    case options[:action].downcase
+    when 'list'
+      networkconfig = SecApp.new(options[:id_domain], options[:user_name], options[:passwd])
+      networkconfig = networkconfig.discover(options[:rest_endpoint], options[:container])
+      puts JSON.pretty_generate(JSON.parse(networkconfig.body))
+    when 'details'
+      networkconfig = SecApp.new(options[:id_domain], options[:user_name], options[:passwd])
+      networkconfig = networkconfig.list(options[:rest_endpoint], options[:container])
+      puts JSON.pretty_generate(JSON.parse(networkconfig.body))
     else
-      case options[:action].downcase
-      when 'list'
-        networkconfig = SecApp.new(options[:id_domain], options[:user_name], options[:passwd])
-        networkconfig = networkconfig.discover(options[:rest_endpoint], options[:container])
-        puts JSON.pretty_generate(JSON.parse(networkconfig.body))
-      when 'details'
-        networkconfig = SecApp.new(options[:id_domain], options[:user_name], options[:passwd])
-        networkconfig = networkconfig.list(options[:rest_endpoint], options[:container])
-        puts JSON.pretty_generate(JSON.parse(networkconfig.body))
-      else
-        puts 'invalid entry for action, please use details or list'
-      end # end of case
-    end # end of validator
+      puts 'invalid entry for action, please use details or list'
+    end # end of case
   end # end of method
 
   def secapp_modify(args)
@@ -57,23 +54,20 @@ class SecAppClient < OpcClient
       'Instance'  => options[:rest_endpoint] }
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
-    if valid.at(0) == 'true'
-      puts valid.at(1)
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    networkconfig = SecApp.new(options[:id_domain], options[:user_name], options[:passwd])
+    case options[:action].downcase
+    when 'create'
+      file = File.read(options[:create_json])
+      update = JSON.parse(file)
+      networkconfig = networkconfig.modify(options[:rest_endpoint], options[:action], update)
+      puts JSON.pretty_generate(JSON.parse(networkconfig.body))
+    when 'delete'
+      networkconfig = networkconfig.modify(options[:rest_endpoint], options[:action], options[:container])
+      puts 'deleted' if networkconfig.code == '204'
+      puts 'error' + networkconfig.code  unless networkconfig.code == '204'
     else
-      networkconfig = SecApp.new(options[:id_domain], options[:user_name], options[:passwd])
-      case options[:action].downcase
-      when 'create'
-        file = File.read(options[:create_json])
-        update = JSON.parse(file)
-        networkconfig = networkconfig.modify(options[:rest_endpoint], options[:action], update)
-        puts JSON.pretty_generate(JSON.parse(networkconfig.body))
-      when 'delete'
-        networkconfig = networkconfig.modify(options[:rest_endpoint], options[:action], options[:container])
-        puts 'deleted' if networkconfig.code == '204'
-        puts 'error' + networkconfig.code  unless networkconfig.code == '204'
-      else
-        puts 'invalid entry for action, please use create or delete'
-      end # end of case
-    end # end of validator
+      puts 'invalid entry for action, please use create or delete'
+    end # end of case
   end # end of method
 end # end of class

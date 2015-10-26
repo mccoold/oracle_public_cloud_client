@@ -22,23 +22,20 @@ class BackUpClient < OpcClient
     attrcheck = nil
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
-    if valid.at(0) == 'true'
-      puts valid.at(1)
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    result = BackUpManager.new
+    if options[:backup_id].nil?
+      result = result.backup_list(options[:inst], nil, options[:id_domain],
+                                  options[:user_name], options[:passwd])
     else
-      result = BackUpManager.new
-      if options[:backup_id].nil?
-        result = result.backup_list(options[:inst], nil, options[:id_domain],
-                                    options[:user_name], options[:passwd])
-      else
-        result = result.backup_list(options[:inst], options[:backup_id], options[:id_domain],
-                                    options[:user_name], options[:passwd])
-      end
-      if result.code == '401' || result.code == '400' || result.code == '404'
-        puts 'error, JSON was not returned  the http response code was' + result.code
-      else
-        JSON.pretty_generate(JSON.parse(result.body))
-      end # end of if
-    end # end of validator
+      result = result.backup_list(options[:inst], options[:backup_id], options[:id_domain],
+                                  options[:user_name], options[:passwd])
+    end
+    if result.code == '401' || result.code == '400' || result.code == '404'
+      puts 'error, JSON was not returned  the http response code was' + result.code
+    else
+      JSON.pretty_generate(JSON.parse(result.body))
+    end # end of if
   end # end of method
 
   def jcsbackup_config_list(args)
@@ -47,18 +44,15 @@ class BackUpClient < OpcClient
     attrcheck = nil
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
-    if valid.at(0) == 'true'
-      puts valid.at(1)
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    result = BackUpManager.new
+    result = result.backup_config_list(options[:inst], options[:id_domain],
+                                       options[:user_name], options[:passwd])
+    if result.code == '401' || result.code == '400' || result.code == '404'
+      puts 'error, JSON was not returned  the http response code was'
+      puts result.code
     else
-      result = BackUpManager.new
-      result = result.backup_config_list(options[:inst], options[:id_domain],
-                                         options[:user_name], options[:passwd])
-      if result.code == '401' || result.code == '400' || result.code == '404'
-        puts 'error, JSON was not returned  the http response code was'
-        puts result.code
-      else
-        JSON.pretty_generate(JSON.parse(result.body))
-      end # end of if
-    end # end of validator
+      JSON.pretty_generate(JSON.parse(result.body))
+    end # end of if
   end # end of method
 end

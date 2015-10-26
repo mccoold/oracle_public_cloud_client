@@ -22,7 +22,7 @@ class InputParse < OpcClient
   def create
     options = {}
     OptionParser.new do |opts|
-      opts.banner = 'Usage: jasscreate.rb [options]'
+      opts.banner = 'Usage: opccreate.rb [options]'
       opts.on('-i', '--id_domain ID_DOMAIN', 'id domain') { |id_domain| options[:id_domain] = id_domain  }
       opts.on('-u', '--user_name NAME', 'User name for account') { |v| options[:user_name] = v }
       opts.on('-p', '--passwd PASS', 'Password for account') { |v| options[:passwd] = v }
@@ -134,10 +134,6 @@ class InputParse < OpcClient
       opts.on("--update_list x,y,z", Array, "list of what fields to update field=value,field=value") do |list|
         options[:list] = list
       end
-      # opts.on('-f', '--file_name FILE_NAME', 'file to upload') { |v| options[:file_name] = v }
-      # opts.on('--file_type FILE_TYPE', 'http file or application type') { |v| options[:file_type] = v }
-      # opts.on('--public_key PUBLIC_KEY', 'RSA Public Key file') { |v| options[:public_key] = v }
-      # opts.on('-O', '--object_name OBJECT_NAME', 'The object you want to do something with') { |v| options[:object_name] = v }
       opts.on('-h', '--help', 'Display this screen') do
         puts opts
         exit

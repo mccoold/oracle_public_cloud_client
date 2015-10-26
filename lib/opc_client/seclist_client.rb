@@ -23,18 +23,15 @@ class SecListClient < OpcClient
       'Container' => options[:container] }
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
-    if valid.at(0) == 'true'
-      puts valid.at(1)
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    options[:action].downcase
+    if options[:action] == 'list' || options[:action] == 'details'
+      networkconfig = SecList.new(options[:id_domain], options[:user_name], options[:passwd])
+      networkconfig = networkconfig.discover(options[:rest_endpoint], options[:container], options[:action])
+      puts JSON.pretty_generate(JSON.parse(networkconfig.body))
     else
-      options[:action].downcase
-      if options[:action] == 'list' || options[:action] == 'details'
-        networkconfig = SecList.new(options[:id_domain], options[:user_name], options[:passwd])
-        networkconfig = networkconfig.discover(options[:rest_endpoint], options[:container], options[:action])
-        puts JSON.pretty_generate(JSON.parse(networkconfig.body))
-      else
-        puts 'invalid entry for action, please use details or list'
-      end # end of if
-    end # end of validator
+      puts 'invalid entry for action, please use details or list'
+    end # end of if
   end # end of method
 
   def update(args)
@@ -45,38 +42,35 @@ class SecListClient < OpcClient
       'Container' => options[:container] }
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
-    if valid.at(0) == 'true'
-      puts valid.at(1)
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    networkconfig = SecList.new(options[:id_domain], options[:user_name], options[:passwd])
+    case options[:action]
+    when 'update'
+      key_sep = '='
+      updates = Hash.new
+      options[:list].each do |v|
+        key_value = v.split(key_sep)
+        updates[key_value.at(0)] = key_value.at(1)
+      end # end of parsing through the update parameters
+      networklist = networkconfig.list(options[:rest_endpoint], options[:container])
+      data = JSON.parse(networklist.body).first
+      data1 = data.at(1)
+      update = data1.at(0)
+      updates.each do |k, v|
+        update[k] = v
+      end
+      networkupdate = networkconfig.update(options[:rest_endpoint], options[:container], options[:action], update)
+      JSON.pretty_generate(JSON.parse(networkupdate.body))
+    when 'create'
+      file = File.read(options[:create_json])
+      update = JSON.parse(file)
+      networkupdate = networkconfig.update(options[:rest_endpoint], options[:container], options[:action], update)
+      JSON.pretty_generate(JSON.parse(networkupdate.body))
+    when 'delete'
+      networkupdate = networkconfig.update(options[:rest_endpoint], options[:container], options[:action])
+      JSON.pretty_generate(JSON.parse(networkupdate.body))
     else
-      networkconfig = SecList.new(options[:id_domain], options[:user_name], options[:passwd])
-      case options[:action]
-      when 'update'
-        key_sep = '='
-        updates = Hash.new
-        options[:list].each do |v|
-          key_value = v.split(key_sep)
-          updates[key_value.at(0)] = key_value.at(1)
-        end # end of parsing through the update parameters
-        networklist = networkconfig.list(options[:rest_endpoint], options[:container])
-        data = JSON.parse(networklist.body).first
-        data1 = data.at(1)
-        update = data1.at(0)
-        updates.each do |k, v|
-          update[k] = v
-        end
-        networkupdate = networkconfig.update(options[:rest_endpoint], options[:container], options[:action], update)
-        JSON.pretty_generate(JSON.parse(networkupdate.body))
-      when 'create'
-        file = File.read(options[:create_json])
-        update = JSON.parse(file)
-        networkupdate = networkconfig.update(options[:rest_endpoint], options[:container], options[:action], update)
-        JSON.pretty_generate(JSON.parse(networkupdate.body))
-      when 'delete'
-        networkupdate = networkconfig.update(options[:rest_endpoint], options[:container], options[:action])
-        JSON.pretty_generate(JSON.parse(networkupdate.body))
-      else
-        puts 'invalid entry for action'
-      end # end of case
-    end # end of validator
+      puts 'invalid entry for action'
+    end # end of case
   end # end of method
 end

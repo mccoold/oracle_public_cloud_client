@@ -21,18 +21,15 @@ class ObjectStorageClient < OpcClient
       'container name'   => options[:container] }
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
-    if valid.at(0) == 'true'
-      puts valid.at(1)
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    newcontainer = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
+    newcontainer = newcontainer.create(options[:container])
+    if newcontainer.code == '201'
+      puts newcontainer.code
+      puts "Container #{options[:container]} created"
     else
-      newcontainer = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
-      newcontainer = newcontainer.create(options[:container])
-      if newcontainer.code == '201'
-        puts newcontainer.code
-        puts "Container #{options[:container]} created"
-      else
-        puts newcontainer.body
-      end # end of if
-    end # end of validator
+      puts newcontainer.body
+    end # end of if
   end # end of method
 
   def storage_list(args)
@@ -41,29 +38,26 @@ class ObjectStorageClient < OpcClient
     attrcheck = nil
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
-    if valid.at(0) == 'true'
-      puts valid.at(1)
-    else
-      if options[:container]
-        containerview = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
-        containerview = containerview.contents(options[:container])
-        if containerview.code == '201'
-          puts containerview.code
-          puts containerview.body
-        else
-          puts containerview.body
-        end # end of inside if
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    if options[:container]
+      containerview = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
+      containerview = containerview.contents(options[:container])
+      if containerview.code == '201'
+        puts containerview.code
+        puts containerview.body
       else
-        newcontainer = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
-        newcontainer = newcontainer.list
-        if newcontainer.code == '201'
-          puts newcontainer.code
-          puts newcontainer.body
-        else
-          puts newcontainer.body
-        end # end of inside if
-      end # end of outside if
-    end # end of validator
+        puts containerview.body
+      end # end of inside if
+    else
+      newcontainer = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
+      newcontainer = newcontainer.list
+      if newcontainer.code == '201'
+        puts newcontainer.code
+        puts newcontainer.body
+      else
+        puts newcontainer.body
+      end # end of inside if
+    end # end of outside if
   end # end of method
 
   def container_delete(args)
@@ -73,19 +67,16 @@ class ObjectStorageClient < OpcClient
       'container name'   => options[:container] }
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
-    if valid.at(0) == 'true'
-      puts valid.at(1)
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    containerview = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
+    containerview = containerview.delete(options[:container])
+    if containerview.code == '201'
+      puts containerview.code
+      # puts "Container #{options[:container]} created"
+      puts containerview.body
     else
-      containerview = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
-      containerview = containerview.delete(options[:container])
-      if containerview.code == '201'
-        puts containerview.code
-        # puts "Container #{options[:container]} created"
-        puts containerview.body
-      else
-        puts containerview.body
-      end # end of if
-    end # end of validator
+      puts containerview.body
+    end # end of if
   end # end of method
 
   def content_upload(args)
@@ -96,18 +87,15 @@ class ObjectStorageClient < OpcClient
       'object_2_create' => options[:object_name] }
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
-    if valid.at(0) == 'true'
-      puts valid.at(1)
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    newcontent = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
+    newcontent = newcontent.object_create(options[:file_name], options[:container], options[:object_name],
+                                          options[:file_type])
+    if newcontent.code == '201'
+      puts newcontent.code
+      puts "Object #{options[:file_name]} has been created in container #{options[:container]}"
     else
-      newcontent = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
-      newcontent = newcontent.object_create(options[:file_name], options[:container], options[:object_name],
-                                            options[:file_type])
-      if newcontent.code == '201'
-        puts newcontent.code
-        puts "Object #{options[:file_name]} has been created in container #{options[:container]}"
-      else
-        puts newcontent.body
-      end # end of if
-    end # end of validator
+      puts newcontent.body
+    end # end of if
   end # end of method
 end # end of class
