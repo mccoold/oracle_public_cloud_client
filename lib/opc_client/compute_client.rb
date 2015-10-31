@@ -14,18 +14,34 @@
 # limitations under the License
 #
 class ComputeClient < OpcClient
-  def instance_list(args)
+  def request_handler(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
-    options = inputparse.compute
+    options = inputparse.compute('compute')
+    attrcheck = { 'Action'    => options[:action] }
+    validate = Validator.new
+    valid = validate.attrvalidate(options, attrcheck)
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    case options[:action].downcase
+    when 'create'
+      update(options)
+    when 'list'
+      list(options)
+    when 'delete'
+      update(options)
+    else
+      abort('you entered an invalid selection for Action') 
+    end # end case
+  end # end method
+
+  def list(options) # rubocop:disable Metrics/AbcSize
     attrcheck = {
       'Instance'  => options[:rest_endpoint],
       'Container' => options[:container] }
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
     abort(valid.at(1)) if valid.at(0) == 'true'
-    instanceconfig = Instance.new
-    instanceconfig = instanceconfig.list(options[:rest_endpoint], options[:container], options[:id_domain],
-                                         options[:user_name], options[:passwd])
+    instanceconfig = Instance.new(options[:id_domain], options[:user_name], options[:passwd])
+    instanceconfig = instanceconfig.list(options[:rest_endpoint], options[:container])
     puts JSON.pretty_generate(JSON.parse(instanceconfig.body))
   end # end of method
 end # end of class

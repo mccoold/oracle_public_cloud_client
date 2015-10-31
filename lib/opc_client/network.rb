@@ -16,7 +16,7 @@
 class Network < OpcClient
   def input(args)
     inputparse =  InputParse.new(args)
-    options = inputparse.compute
+    options = inputparse.compute('network')
     attrcheck = nil
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
@@ -46,7 +46,9 @@ class Network < OpcClient
             puts 'created'
             puts JSON.pretty_generate(JSON.parse(networkconfig.body))
           when 'modify'
-            puts 'nothing done yet'
+            networkconfig = networkconfig.update(options[:rest_endpoint], conf.at(1)['Parameters']['name'], 'update',
+                                                 conf.at(1)['Parameters'])
+            puts 'updated rule ' + conf.at(1)['Parameters']['name'] if networkconfig.code == '204'
           when 'delete'
             networkconfig = networkconfig.update(options[:rest_endpoint], conf.at(1)['Parameters']['name'], 'delete',
                                                  conf.at(1)['Parameters'])
@@ -59,8 +61,10 @@ class Network < OpcClient
             puts 'created'
             networkconfig = networkconfig.update(options[:rest_endpoint], nil, 'create', conf.at(1)['Parameters'])
             puts JSON.pretty_generate(JSON.parse(networkconfig.body))
-          when 'modify'
-            puts 'nothing done yet'
+          when 'update'
+            puts 'updated'
+            networkconfig = networkconfig.update(options[:rest_endpoint], nil, 'update', conf.at(1)['Parameters'])
+            puts JSON.pretty_generate(JSON.parse(networkconfig.body))
           when 'delete'
             networkconfig = networkconfig.update(options[:rest_endpoint], conf.at(1)['Parameters']['name'], 'delete',
                                                  app.at(1)['Parameters'])
@@ -70,10 +74,13 @@ class Network < OpcClient
           networkconfig = SecIPList.new(options[:id_domain], options[:user_name], options[:passwd])
           case conf.at(1)['Action']
           when 'create'
+            puts 'created'
             networkconfig = networkconfig.update(options[:rest_endpoint], nil, 'create', conf.at(1)['Parameters'])
             puts JSON.pretty_generate(JSON.parse(networkconfig.body))
-          when 'modify'
-            puts 'nothing done yet'
+          when 'update'
+            puts 'updated'
+            networkconfig = networkconfig.update(options[:rest_endpoint], nil, 'update', conf.at(1)['Parameters'])
+            puts JSON.pretty_generate(JSON.parse(networkconfig.body))
           when 'delete'
             networkconfig = networkconfig.update(options[:rest_endpoint], conf.at(1)['Parameters']['name'], 'delete',
                                                  conf.at(1)['Parameters'])
@@ -83,10 +90,11 @@ class Network < OpcClient
           networkconfig = SecAssoc.new(options[:id_domain], options[:user_name], options[:passwd])
           case conf.at(1)['Action']
           when 'create'
+            puts 'created'
             networkconfig = networkconfig.update(options[:rest_endpoint], nil, 'create', conf.at(1)['Parameters'])
             puts JSON.pretty_generate(JSON.parse(networkconfig.body))
           when 'modify'
-            puts 'nothing done yet'
+            puts 'not available on OPC yet'
           when 'delete'
             networkconfig = networkconfig.update(options[:rest_endpoint], conf.at(1)['Parameters']['name'], 'delete',
                                                  conf.at(1)['Parameters'])
@@ -97,17 +105,18 @@ class Network < OpcClient
           callclass = conf.at(1)['Class']
           case conf.at(1)['Action']
           when 'create'
+            puts 'created'
             networkconfig = networkconfig.update(options[:rest_endpoint], nil, 'create', callclass, conf.at(1)['Parameters'])
             puts JSON.pretty_generate(JSON.parse(networkconfig.body))
           when 'modify'
-            puts 'nothing done yet'
+            puts 'not fully available yet'
           when 'delete'
             networkconfig = networkconfig.update(options[:rest_endpoint], conf.at(1)['Parameters']['name'], 'delete',
                                                  callclass, conf.at(1)['Parameters'])
             puts 'deleted IP ' + callclass + ' ' + conf.at(1)['Parameters']['name'] if networkconfig.code == '204'
-          end
+          end # end of case
         end # end of if
-      end
+      end # end of app loop
     end # end of loop for inputdata
   end  # end create method
 end # end of class

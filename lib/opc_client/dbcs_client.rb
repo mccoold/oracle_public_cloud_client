@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 class DbcsClient < OpcClient
-  def dbaas_manage_client(args)
+  def dbaas_manage_client(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
     options = inputparse.jaas_manage
     attrcheck = {

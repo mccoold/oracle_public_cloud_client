@@ -14,24 +14,27 @@
 # limitations under the License
 #
 class SecAppClient < OpcClient
-  def secapp_discover(args)  # depricated needs to be deleted
+  def discover(args)  # depricated needs to be deleted
     inputparse =  InputParse.new(args)
-    options = inputparse.compute
+    options = inputparse.compute('secapp')
     networkconfig = SecApp.new(options[:id_domain], options[:user_name], options[:passwd])
     networkconfig = networkconfig.discover(options[:rest_endpoint], options[:container])
     puts JSON.pretty_generate(JSON.parse(networkconfig.body))
   end # end of method
 
-  def secapp_list(args)
-    inputparse =  InputParse.new(args)
-    options = inputparse.compute
-    attrcheck = {
-      'Action'    => options[:action],
-      'Instance'  => options[:rest_endpoint],
-      'Container' => options[:container] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+  def list(args)
+    if caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
+      inputparse =  InputParse.new(args)
+      options = inputparse.compute('secapp')
+      attrcheck = {
+        'Action'    => options[:action],
+        'Instance'  => options[:rest_endpoint],
+        'Container' => options[:container] }
+      validate = Validator.new
+      valid = validate.attrvalidate(options, attrcheck)
+      abort(valid.at(1)) if valid.at(0) == 'true'
+    end # end of unless
+    options = args unless caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
     case options[:action].downcase
     when 'list'
       networkconfig = SecApp.new(options[:id_domain], options[:user_name], options[:passwd])
@@ -46,9 +49,9 @@ class SecAppClient < OpcClient
     end # end of case
   end # end of method
 
-  def secapp_modify(args)
+  def modify(args)
     inputparse =  InputParse.new(args)
-    options = inputparse.compute
+    options = inputparse.compute('secapp')
     attrcheck = {
       'Action'    => options[:action],
       'Instance'  => options[:rest_endpoint] }

@@ -19,7 +19,7 @@ class InputParse < OpcClient
     @args = args
   end
 
-  def create
+  def create # rubocop:disable Metrics/AbcSize
     options = {}
     OptionParser.new do |opts|
       opts.banner = 'Usage: opccreate.rb [options]'
@@ -38,16 +38,16 @@ class InputParse < OpcClient
     options
   end # end of method
 
-  def inst_list
+  def inst_list(caller) # rubocop:disable Metrics/AbcSize
     options = {}
     OptionParser.new do |opts|
       opts.banner = 'Usage: example.rb [options]'
       opts.on('-i', '--id_domain ID_DOMAIN', 'id domain') { |id_domain| options[:id_domain] = id_domain }
       opts.on('-u', '--user_name NAME', 'User name for account') { |v| options[:user_name] = v }
       opts.on('-p', '--passwd PASS', 'Password for account') { |v| options[:passwd] = v }
-      opts.on('-A', '--action ACTION', 'action options, stop, start, restart') { |v| options[:action] = v }
+      opts.on('-A', '--action ACTION', 'action options, stop, start, restart') { |v| options[:action] = v } unless caller == 'bkup'
       opts.on('-I', '--inst INST', 'Instance name') { |v| options[:inst] = v }
-      opts.on('-b', '--backup_id BACKUP_ID', 'backup ID') { |v| options[:backup_id] = v }
+      opts.on('-b', '--backup_id BACKUP_ID', 'backup ID') { |v| options[:backup_id] = v } if caller == 'bkup'
       opts.on('-m', '--managed [MANG]', 'flag for managed instances') { |v| options[:mang] = v }
       opts.on('-h', '--help', 'Display this screen') do
         puts opts
@@ -57,7 +57,7 @@ class InputParse < OpcClient
     options
   end # end of method
 
-  def delete
+  def delete # rubocop:disable Metrics/AbcSize
     options = {}
     OptionParser.new do |opts|
       opts.banner = 'Usage: example.rb [options]'
@@ -66,9 +66,9 @@ class InputParse < OpcClient
       opts.on('-p', '--passwd PASS', 'Password for account') { |v| options[:passwd] = v }
       opts.on('-A', '--action ACTION', 'action options, stop, start, restart') { |v| options[:action] = v }
       opts.on('-I', '--inst INST', 'Instance name to be deleted') { |v| options[:inst] = v }
-      opts.on('-c', '--config CONFIG', 'delete config JSON') { |v| options[:config] = v }
-      opts.on('-D', '--dbuser DBUSER', 'DB username') { |v| options[:dbuser] = v }
-      opts.on('-P', '--dbpass DBPASS', 'DB password') { |v| options[:dbpass] = v }
+      opts.on('-c', '--config CONFIG', 'delete config JSON, for jsc only') { |v| options[:config] = v }
+      opts.on('-D', '--dbuser DBUSER', 'DB username, for dbcs only') { |v| options[:dbuser] = v }
+      opts.on('-P', '--dbpass DBPASS', 'DB password, for dbcs only') { |v| options[:dbpass] = v }
       opts.on('-h', '--help', 'Display this screen') do
         puts opts
         exit
@@ -77,7 +77,7 @@ class InputParse < OpcClient
     options
   end  # end of method
 
-  def storage_create
+  def storage_create # rubocop:disable Metrics/AbcSize
     options = {}
     OptionParser.new do |opts|
       opts.banner = 'Usage: example.rb [options]'
@@ -98,7 +98,7 @@ class InputParse < OpcClient
     options
   end  # end of method
 
-  def jaas_manage
+  def jaas_manage # rubocop:disable Metrics/AbcSize
     options = {}
     OptionParser.new do |opts|
       opts.banner = 'Usage: example.rb [options]'
@@ -119,8 +119,8 @@ class InputParse < OpcClient
     end.parse!
     options
   end # end of method
-  
-  def compute
+
+  def compute(caller) # rubocop:disable Metrics/AbcSize
     options = {}
     OptionParser.new do |opts|
       opts.banner = 'Usage: example.rb [options]'
@@ -129,9 +129,10 @@ class InputParse < OpcClient
       opts.on('-p', '--passwd PASS', 'Password for account') { |v| options[:passwd] = v }
       opts.on('-R', '--rest_endpoint REST_ENDPOINT', 'Rest end point for compute') { |v| options[:rest_endpoint] = v }
       opts.on('-C', '--container CONTAINER', 'Management Container Name for object') { |v| options[:container] = v }
+      opts.on('-f', '--function FUNCTION', 'Management Container Name for object') { |v| options[:function] = v } if caller == 'networklist'
       opts.on('-A', '--action ACTION', 'action for the function, list or detail') { |v| options[:action] = v }
       opts.on('-j', '--create_json JSON', 'json file to describe server') { |v| options[:create_json] = v }
-      opts.on("--update_list x,y,z", Array, "list of what fields to update field=value,field=value") do |list|
+      opts.on('--update_list x,y,z', Array, 'list of what fields to update field=value,field=value') do |list|
         options[:list] = list
       end
       opts.on('-h', '--help', 'Display this screen') do

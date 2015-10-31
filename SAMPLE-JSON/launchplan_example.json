@@ -31,7 +31,7 @@
       "sshkeys": null,
       "resolvers": null,
       "account": null,
-      "name": "/acme/administrator/primary_webserver",
+      "name": "/Compute-metcsgse00123/cloud.admin/primary_webserver",
       "vcable_id": null,
       "uri": null,
       "reverse_dns": true,

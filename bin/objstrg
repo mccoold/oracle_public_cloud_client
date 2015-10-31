@@ -1,0 +1,4 @@
+#! /usr/bin/ruby
+require 'opc_client'
+storage= ObjectStorageClient.new
+puts storage.request_handler(ARGV)

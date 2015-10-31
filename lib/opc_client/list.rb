@@ -16,7 +16,7 @@
 class PaasList < OpcClient
   def srvice_list(args)
     inputparse =  InputParse.new(args)
-    options = inputparse.inst_list
+    options = inputparse.inst_list('list')
     attrcheck = nil
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
@@ -35,7 +35,7 @@ class PaasListUtil < OpcClient # search util class
     result = function.new(@options[:id_domain], @options[:user_name], @options[:passwd])
     if @options[:inst]
       search = PaasListUtil.new(@options)
-      search.inst_jcs(result)
+      search.inst(result)
     else
       result = result.service_list(@options[:action])
       print 'error, JSON was not returned  the http response code was ' +
@@ -44,7 +44,7 @@ class PaasListUtil < OpcClient # search util class
     end # end of inst if
   end # end of method
 
-  def inst_jcs(result)
+  def inst(result)
     if @options[:mang]
       result = result.managed_list(@options[:inst])
       puts JSON.pretty_generate(result)

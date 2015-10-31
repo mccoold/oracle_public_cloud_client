@@ -14,35 +14,41 @@
 # limitations under the License
 #
 class SecRuleClient < OpcClient
-  def secrule_list(args)
-    inputparse =  InputParse.new(args)
-    options = inputparse.compute
-    attrcheck = {
-      'Action'    => options[:action],
-      'Instance'  => options[:rest_endpoint],
-      'Container' => options[:container] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+  def list(args)
+    if caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
+      inputparse =  InputParse.new(args)
+      options = inputparse.compute('secrule')
+      attrcheck = {
+        'Action'    => options[:action],
+        'Instance'  => options[:rest_endpoint],
+        'Container' => options[:container] }
+      validate = Validator.new
+      valid = validate.attrvalidate(options, attrcheck)
+      abort(valid.at(1)) if valid.at(0) == 'true'
+    end
+    options = args unless caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
     options[:action].downcase
     if options[:action] == 'list' || options[:action] == 'details'
       networkconfig = SecRule.new(options[:id_domain], options[:user_name], options[:passwd])
       networkconfig = networkconfig.discover(options[:rest_endpoint], options[:container], options[:action])
       puts JSON.pretty_generate(JSON.parse(networkconfig.body))
     else
-      puts 'invalid entry for action, please use details or list'
+      puts 'Invalid entry for action, please use details or list'
     end # end of if
   end # end of method
 
-  def secrule_update(args)
-    inputparse =  InputParse.new(args)
-    options = inputparse.compute
-    attrcheck = {
-      'Instance'  => options[:rest_endpoint],
-      'Container' => options[:container] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+  def update(args)
+    if caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1] == nil
+      inputparse =  InputParse.new(args)
+      options = inputparse.compute('secrule')
+      attrcheck = {
+        'Instance'  => options[:rest_endpoint],
+        'Container' => options[:container] }
+      validate = Validator.new
+      valid = validate.attrvalidate(options, attrcheck)
+      abort(valid.at(1)) if valid.at(0) == 'true'
+    end
+    options = args unless caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1] == nil  
     networkconfig = SecRule.new(options[:id_domain], options[:user_name], options[:passwd])
     case options[:action]
     when 'update'

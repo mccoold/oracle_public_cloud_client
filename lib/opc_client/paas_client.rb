@@ -49,9 +49,9 @@ class PaasClient < OpcClient
     deleteconfig = File.read(options[:config]) if options[:action] == 'jcs'
     data_hash = JSON.parse(deleteconfig) if options[:action] == 'jcs'
     deleteinst = InstDelete.new(options[:id_domain], options[:user_name], options[:passwd])
-    puts JSON.pretty_generate(JSON.parse(deleteinst.delete(options[:action], data_hash,
-                                                           options[:inst]))) if options[:action] == 'jcs'
-    puts JSON.retty_generate(JSON.parse(deleteinst.delete(options[:action], nil,
-                                                          options[:inst]))) if options[:action] == 'dbcs'
-  end   # end of method
+    result = deleteinst.delete(options[:action], data_hash, options[:inst]) if options[:action] == 'jcs'
+    result = deleteinst.delete(options[:action], nil, options[:inst]) if options[:action] == 'dbcs'
+    puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '202'
+    puts result.body + result.code unless result.code == '202'
+  end # end of method
 end # end of class

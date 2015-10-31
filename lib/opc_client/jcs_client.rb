@@ -26,6 +26,9 @@ class JcsClient < OpcClient
     instmanage = JaasManager.new(options[:id_domain], options[:user_name], options[:passwd])
     case options[:action].downcase
     when  'stop', 'start'
+      attrcheck = { 'Timeout' => options[:timeout] }
+      valid = validate.attrvalidate(options, attrcheck)
+      abort(valid.at(1)) if valid.at(0) == 'true'
       result = instmanage.mngstate(options[:timeout], options[:inst], options[:action])
       result['location']
     when 'scaleup'

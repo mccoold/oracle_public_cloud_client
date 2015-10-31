@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-class DataGridClient < OpcClient
+class OrchClient < OpcClient
   def request_handler(args)
     inputparse =  InputParse.new(args)
     options = inputparse.create
@@ -31,17 +31,9 @@ class DataGridClient < OpcClient
     end
   end
   
-  def create(options) # rubocop:disable Metrics/AbcSize
-    attrcheck = {'Instance'      => options[:inst],
-                 'create_json'   => options[:create_json]
-                }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
-    file = File.read(options[:create_json])
-    data_hash = JSON.parse(file)
+  def create(options)
     dgcreate = DataGrid.new(options[:id_domain], options[:user_name], options[:passwd])
-    createcall = dgcreate.create(options[:inst], data_hash)
+    createcall = dgcreate.create(options[:inst])
     if createcall.code == '400'
       puts 'error'
       puts createcall.body
@@ -49,27 +41,14 @@ class DataGridClient < OpcClient
       puts createcall.body
     end
   end  # end create method
-
-  def list(options) # rubocop:disable Metrics/AbcSize
-    attrcheck = nil
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+ 
+  def list(options) 
     result = DataGrid.new(options[:id_domain], options[:user_name], options[:passwd])
-    result = result.list
-    if result.code == '401' || result.code == '400' || result.code == '404'
-      puts 'error, JSON was not returned  the http response code was' + result.code
+    if options[:backup_id].nil?
+      result = result.backup_list(options[:inst])
     else
-      JSON.pretty_generate(JSON.parse(result.body))
-    end # end of if
-  end # end of method
-  
-  def delete(options) # rubocop:disable Metrics/AbcSize
-    attrcheck = { 'Instance'  => options[:inst] }
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
-    result = DataGrid.new(options[:id_domain], options[:user_name], options[:passwd])
-    result = result.delete(options[:inst])
+      result = result.backup_list(options[:inst])
+    end
     if result.code == '401' || result.code == '400' || result.code == '404'
       puts 'error, JSON was not returned  the http response code was' + result.code
     else

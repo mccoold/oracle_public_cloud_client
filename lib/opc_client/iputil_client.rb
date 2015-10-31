@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License
 #
-class SecListClient < OpcClient
+class IPUtilClient < OpcClient
   def list(args)
     if caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
       inputparse =  InputParse.new(args)
-      options = inputparse.compute('seclist')
+      options = inputparse.compute('iputil')
       attrcheck = {
         'Action'    => options[:action],
         'Instance'  => options[:rest_endpoint],
@@ -25,12 +25,14 @@ class SecListClient < OpcClient
       validate = Validator.new
       valid = validate.attrvalidate(options, attrcheck)
       abort(valid.at(1)) if valid.at(0) == 'true'
-    end # end of if
+    end
     options = args unless caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
+    function = 'association' if options[:function] == 'ip_association'
+    function = 'reservation' if options[:function] == 'ip_reservation'
     options[:action].downcase
     if options[:action] == 'list' || options[:action] == 'details'
-      networkconfig = SecList.new(options[:id_domain], options[:user_name], options[:passwd])
-      networkconfig = networkconfig.discover(options[:rest_endpoint], options[:container], options[:action])
+      networkconfig = IPUtil.new(options[:id_domain], options[:user_name], options[:passwd])
+      networkconfig = networkconfig.discover(options[:rest_endpoint], options[:container], options[:action], function)
       puts JSON.pretty_generate(JSON.parse(networkconfig.body))
     else
       puts 'Invalid entry for action, please use details or list'
@@ -38,27 +40,24 @@ class SecListClient < OpcClient
   end # end of method
 
   def update(args)
-    if caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
-      inputparse =  InputParse.new(args)
-      options = inputparse.compute('seclist')
-      attrcheck = {
-        'Instance'  => options[:rest_endpoint],
-        'Container' => options[:container] }
-      validate = Validator.new
-      valid = validate.attrvalidate(options, attrcheck)
-      abort(valid.at(1)) if valid.at(0) == 'true'
-    end
-    options = args unless caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
-    networkconfig = SecList.new(options[:id_domain], options[:user_name], options[:passwd])
+    inputparse =  InputParse.new(args)
+    options = inputparse.compute('iputil')
+    attrcheck = {
+      'Instance'  => options[:rest_endpoint],
+      'Container' => options[:container] }
+    validate = Validator.new
+    valid = validate.attrvalidate(options, attrcheck)
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    networkconfig = IPUtil.new(options[:id_domain], options[:user_name], options[:passwd])
     case options[:action]
     when 'update'
       key_sep = '='
-      updates = Hash.new
+      updates = {}
       options[:list].each do |v|
         key_value = v.split(key_sep)
         updates[key_value.at(0)] = key_value.at(1)
       end # end of parsing through the update parameters
-      networklist = networkconfig.list(options[:rest_endpoint], options[:container], options[:action])
+      networklist = networkconfig.list(options[:rest_endpoint], options[:container])
       data = JSON.parse(networklist.body).first
       data1 = data.at(1)
       update = data1.at(0)
@@ -76,7 +75,7 @@ class SecListClient < OpcClient
       networkupdate = networkconfig.update(options[:rest_endpoint], options[:container], options[:action])
       JSON.pretty_generate(JSON.parse(networkupdate.body))
     else
-      puts 'invalid entry for action'
+      abort('you entered an invalid selection for Action')
     end # end of case
   end # end of method
 end

@@ -14,9 +14,26 @@
 # limitations under the License
 #
 class ObjectStorageClient < OpcClient
-  def storage_create(args)
+  def request_handler(args)
     inputparse =  InputParse.new(args)
     options = inputparse.storage_create
+    attrcheck = { 'Action'    => options[:action] }
+    validate = Validator.new
+    valid = validate.attrvalidate(options, attrcheck)
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    case options[:action].downcase
+    when 'create'
+      create(options)
+    when 'list'
+      list(options)
+    when 'delete'
+      delete(options)
+    else
+      abort('you entered an invalid selection for Action') 
+    end
+  end
+  
+  def create(options)
     attrcheck = {
       'container name'   => options[:container] }
     validate = Validator.new
@@ -32,13 +49,7 @@ class ObjectStorageClient < OpcClient
     end # end of if
   end # end of method
 
-  def storage_list(args)
-    inputparse =  InputParse.new(args)
-    options = inputparse.storage_create
-    attrcheck = nil
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+  def list(options)
     if options[:container]
       containerview = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
       containerview = containerview.contents(options[:container])
@@ -46,23 +57,22 @@ class ObjectStorageClient < OpcClient
         puts containerview.code
         puts containerview.body
       else
-        puts containerview.body
+        abort(containerview.body)
       end # end of inside if
     else
       newcontainer = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
       newcontainer = newcontainer.list
-      if newcontainer.code == '201'
+      if newcontainer.code == '200'
         puts newcontainer.code
         puts newcontainer.body
       else
-        puts newcontainer.body
+        abort(newcontainer.body) unless newcontainer.code == '204'
+        puts 'there are no containers' if newcontainer.code == '204'
       end # end of inside if
     end # end of outside if
   end # end of method
 
-  def container_delete(args)
-    inputparse =  InputParse.new(args)
-    options = inputparse.storage_create
+  def delete(options)
     attrcheck = {
       'container name'   => options[:container] }
     validate = Validator.new
@@ -70,10 +80,8 @@ class ObjectStorageClient < OpcClient
     abort(valid.at(1)) if valid.at(0) == 'true'
     containerview = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
     containerview = containerview.delete(options[:container])
-    if containerview.code == '201'
-      puts containerview.code
-      # puts "Container #{options[:container]} created"
-      puts containerview.body
+    if containerview.code == '204'
+      puts "Container #{options[:container]} deleted"
     else
       puts containerview.body
     end # end of if

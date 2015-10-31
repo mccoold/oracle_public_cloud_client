@@ -14,13 +14,27 @@
 # limitations under the License
 #
 class BlockStorageClient < OpcClient
-  #
-  # require 'OPC/Iaas/blockstorage'
-  def list(args)
+  def request_handler(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
-    options = inputparse.compute
+    options = inputparse.compute('blockstorage')
+    attrcheck = { 'Action'  => options[:action] }
+    validate = Validator.new
+    valid = validate.attrvalidate(options, attrcheck)
+    abort(valid.at(1)) if valid.at(0) == 'true'
+    case options[:action].downcase
+    when 'create'
+      update(options)
+    when 'list'
+      list(options)
+    when 'delete'
+      update(options)
+    else
+      abort('you entered an invalid selection for Action')  
+    end # end case
+  end # end method
+
+  def list(options)  # rubocop:disable Metrics/AbcSize
     attrcheck = {
-      'Action'    => options[:action],
       'Instance'  => options[:rest_endpoint],
       'Container' => options[:container] }
     validate = Validator.new
@@ -36,18 +50,20 @@ class BlockStorageClient < OpcClient
     end # end of if
   end # end of method
 
-  def update(args)
-    inputparse =  InputParse.new(args)
-    options = inputparse.compute
+  def update(options) # rubocop:disable Metrics/AbcSize
     attrcheck = {
       'Instance'  => options[:rest_endpoint],
-      'Container' => options[:container] }
+      'Container' => options[:container]
+                }
     validate = Validator.new
     valid = validate.attrvalidate(options, attrcheck)
     abort(valid.at(1)) if valid.at(0) == 'true'
     storageconfig = BlockStorage.new(options[:id_domain], options[:user_name], options[:passwd])
-    case options[:action]
+    case options[:action].downcase
     when 'create'
+      attrcheck = { 'create_json' => options[:create_json] }
+      valid = validate.attrvalidate(options, attrcheck)
+      abort(valid.at(1)) if valid.at(0) == 'true'
       file = File.read(options[:create_json])
       update = JSON.parse(file)
       storageupdate = storageconfig.update(options[:rest_endpoint], options[:action], update)
