@@ -1,4 +1,4 @@
 #! /usr/bin/ruby
 require 'opc_client'
 dg = DataGridClient.new
-puts dg.list(ARGV)
+puts dg.request_handler(ARGV)
