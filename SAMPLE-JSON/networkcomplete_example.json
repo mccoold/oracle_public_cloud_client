@@ -3,7 +3,7 @@
   	{
   		"1" :
   		{
-		    "Action" : "delete", 
+		    "Action" : "create", 
 		    "Parameters" : 
 	    	{
 	      		"protocol" : "udp",
@@ -20,7 +20,7 @@
 	{
 		"1" :
 		{
-			"Action" : "delete", 
+			"Action" : "create", 
 		    "Parameters" : 
 			{
 				"dst_list" : "seclist:/<ID_Domain>/<userName>/jaas/JCSDemo/wls/ora_admin",
@@ -38,7 +38,7 @@
 	{
 		"1": 
 		{
-			"Action" : "delete", 
+			"Action" : "create", 
 	    	"Parameters" :
 			{
 			  "account": "/<ID_Domain>/default",
@@ -53,7 +53,7 @@
 		},
 		"2" :
 		{
-			"Action" : "delete", 
+			"Action" : "create", 
 		    "Parameters" :
 			{
 			  "account": "/<ID_Domain>/default",
@@ -71,7 +71,7 @@
 	{
 		"1" :
 		{
-			"Action" : "delete", 
+			"Action" : "create", 
 		    "Parameters" :
 			{
 			  "account": "/<ID_Domain>/default",
@@ -89,7 +89,7 @@
 	{
 		"1" :
 		{
-			"Action" : "delete", 
+			"Action" : "create", 
 		    "Parameters" :
 			{
 			  "account": "/<ID_Domain>/default",
@@ -107,7 +107,7 @@
 		"1" :
 		{
 			"Class" : "association",
-			"Action" : "delete", 
+			"Action" : "create", 
 		    "Parameters" :
 			{
 			  "account": null,
@@ -121,7 +121,7 @@
 	  	"2" :
 	    {
 		    "Class" : "reservation",
-			"Action" : "delete", 
+			"Action" : "create", 
 		    "Parameters" :
 			{
 			  "account": null,
