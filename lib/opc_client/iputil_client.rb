@@ -14,7 +14,8 @@
 # limitations under the License
 #
 class IPUtilClient < OpcClient
-  def list(args)
+  
+  def list(args) # rubocop:disable Metrics/AbcSize
     if caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
       inputparse =  InputParse.new(args)
       options = inputparse.compute('iputil')
@@ -22,9 +23,8 @@ class IPUtilClient < OpcClient
         'Action'    => options[:action],
         'Instance'  => options[:rest_endpoint],
         'Container' => options[:container] }
-      validate = Validator.new
-      valid = validate.attrvalidate(options, attrcheck)
-      abort(valid.at(1)) if valid.at(0) == 'true'
+        @validate = Validator.new
+      @validate.attrvalidate(options, attrcheck)
     end
     options = args unless caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
     function = 'association' if options[:function] == 'ip_association'
@@ -39,17 +39,16 @@ class IPUtilClient < OpcClient
     end # end of if
   end # end of method
 
-  def update(args)
+  def update(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
     options = inputparse.compute('iputil')
     attrcheck = {
       'Instance'  => options[:rest_endpoint],
       'Container' => options[:container] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    @validate = Validator.new
+    @validate.attrvalidate(options, attrcheck)
     networkconfig = IPUtil.new(options[:id_domain], options[:user_name], options[:passwd])
-    case options[:action]
+    case options[:action].downcase
     when 'update'
       key_sep = '='
       updates = {}
@@ -75,7 +74,7 @@ class IPUtilClient < OpcClient
       networkupdate = networkconfig.update(options[:rest_endpoint], options[:container], options[:action])
       JSON.pretty_generate(JSON.parse(networkupdate.body))
     else
-      abort('you entered an invalid selection for Action')
+      abort('You entered an invalid selection for Action')
     end # end of case
   end # end of method
 end

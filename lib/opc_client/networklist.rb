@@ -14,17 +14,16 @@
 # limitations under the License.
 #
 class NetworkList < OpcClient
-  def network_list(args)
+  def network_list(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
     options = inputparse.compute('networklist')
     attrcheck = {
-      'Action'    => options[:action],
+      'Action'          => options[:action],
       'Rest End Point'  => options[:rest_endpoint],
-      'Container' => options[:container],
-      'Function'  => options[:function] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+      'Container'       => options[:container],
+      'Function'        => options[:function] }
+    @validate = Validator.new
+    @validate.attrvalidate(options, attrcheck)
     case options[:function].downcase
     when 'seclist'
       seclistc = SecListClient.new
@@ -45,7 +44,7 @@ class NetworkList < OpcClient
       iputilc = IPUtilClient.new
       iputilc.list(options)
     else
-      abort('you entered an invalid selection for Function')
+      abort('You entered an invalid selection for Function')
     end # end of case
   end
 end

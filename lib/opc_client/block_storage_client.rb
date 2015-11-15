@@ -17,10 +17,13 @@ class BlockStorageClient < OpcClient
   def request_handler(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
     options = inputparse.compute('blockstorage')
-    attrcheck = { 'Action'  => options[:action] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    attrcheck = {
+      'Action'         => options[:action],
+      'REST endpoint'  => options[:rest_endpoint],
+      'Container'      => options[:container]
+    }
+    @validate = Validator.new
+    @validate.attrvalidate(options, attrcheck)
     case options[:action].downcase
     when 'create'
       update(options)
@@ -29,17 +32,11 @@ class BlockStorageClient < OpcClient
     when 'delete'
       update(options)
     else
-      abort('you entered an invalid selection for Action')  
+      abort('you entered an invalid selection for Action')
     end # end case
   end # end method
 
   def list(options)  # rubocop:disable Metrics/AbcSize
-    attrcheck = {
-      'Instance'  => options[:rest_endpoint],
-      'Container' => options[:container] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
     options[:action].downcase
     if options[:action] == 'list' || options[:action] == 'details'
       storageconfig = BlockStorage.new(options[:id_domain], options[:user_name], options[:passwd])
@@ -51,19 +48,11 @@ class BlockStorageClient < OpcClient
   end # end of method
 
   def update(options) # rubocop:disable Metrics/AbcSize
-    attrcheck = {
-      'Instance'  => options[:rest_endpoint],
-      'Container' => options[:container]
-                }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
     storageconfig = BlockStorage.new(options[:id_domain], options[:user_name], options[:passwd])
     case options[:action].downcase
     when 'create'
       attrcheck = { 'create_json' => options[:create_json] }
-      valid = validate.attrvalidate(options, attrcheck)
-      abort(valid.at(1)) if valid.at(0) == 'true'
+      @validate.attrvalidate(options, attrcheck)
       file = File.read(options[:create_json])
       update = JSON.parse(file)
       storageupdate = storageconfig.update(options[:rest_endpoint], options[:action], update)
@@ -73,7 +62,7 @@ class BlockStorageClient < OpcClient
                                                    options[:action])
       JSON.pretty_generate(JSON.parse(storageupdate.body))
     else
-      puts 'invalid entry'
+      abort('invalid entry')
     end # end of case
   end # end of method
 end

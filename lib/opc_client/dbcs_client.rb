@@ -16,16 +16,15 @@
 class DbcsClient < OpcClient
   def dbaas_manage_client(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
-    options = inputparse.jaas_manage
+    options = inputparse.manage
     attrcheck = {
       'Action'   => options[:action],
       'Instance' => options[:inst] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    @validate = Validator.new
+    @validate.attrvalidate(options, attrcheck)
     instmanage = DbaasManager.new(options[:id_domain], options[:user_name], options[:passwd])
     options[:action].downcase
-    case options[:action]
+    case options[:action].downcase
     when  'stop', 'start'
       result = instmanage.power(options[:inst], options[:action])
       if result.code == '401'
@@ -36,7 +35,7 @@ class DbcsClient < OpcClient
         result['Location']
       end
     when 'scaleup'
-      file = File.read("#{options[:create_json]}")
+      file = File.read(options[:create_json])
       scaling = JSON.parse(file)
       result = instmanage.scale_up(scaling, options[:inst], options[:cluster_id])
       if result.code == '202'

@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 class Utilities < OpcClient
-  def create_result(options, createcall, function, caller)
+  def create_result(options, createcall, function)  # rubocop:disable Metrics/AbcSize
     res = JSON.parse(function.create_status(createcall['location']))
     puts 'building ' + res['service_name']
     if options[:track]
@@ -25,19 +25,19 @@ class Utilities < OpcClient
       end # end of while
       result = SrvList.new(options[:id_domain], options[:user_name], options[:passwd])
       puts res['service_name']
-      result = result.inst_list(res['service_name'])
+      result = result.inst_list(options[:action], res['service_name'])
       puts JSON.pretty_generate(JSON.parse(result.body))
     end # end of track if
   end # end of method
 
-  def encrypt_content_upload(args)
+  def encrypt_content_upload(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
     options = inputparse.storage_create
     attrcheck = {
       'object'    => options[:object_name],
       'file name' => options[:file_name] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
+    @validate = Validator.new
+    @validate.attrvalidate(options, attrcheck)
     if valid.at(0) == 'true'
       puts valid.at(1)
     else

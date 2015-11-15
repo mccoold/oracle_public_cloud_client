@@ -14,15 +14,15 @@
 # limitations under the License.
 #
 class PaasClient < OpcClient
-  def create(args)
+  
+  def create(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
     options = inputparse.create
     attrcheck = {
       'create_json'   => options[:create_json],
       'Action'        => options[:action] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    @validate = Validator.new
+    @validate.attrvalidate(options, attrcheck)
     file = File.read(options[:create_json])
     data_hash = JSON.parse(file)
     opccreate = InstCreate.new(options[:id_domain], options[:user_name], options[:passwd])
@@ -34,18 +34,17 @@ class PaasClient < OpcClient
     else
       function = opccreate
       util = Utilities.new
-      util.create_result(options, createcall, function, 'jcs')
+      util.create_result(options, createcall, function)
     end # end of main if
     # end # end of validator if
   end  # end create method
 
-  def delete(args)
+  def delete(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
     options = inputparse.delete
     attrcheck = { 'Instance' => options[:inst] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    @validate = Validator.new
+    @validate.attrvalidate(options, attrcheck)
     deleteconfig = File.read(options[:config]) if options[:action] == 'jcs'
     data_hash = JSON.parse(deleteconfig) if options[:action] == 'jcs'
     deleteinst = InstDelete.new(options[:id_domain], options[:user_name], options[:passwd])

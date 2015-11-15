@@ -14,13 +14,12 @@
 # limitations under the License
 #
 class ObjectStorageClient < OpcClient
-  def request_handler(args)
+  def request_handler(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
     options = inputparse.storage_create
-    attrcheck = { 'Action'    => options[:action] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    attrcheck = { 'Action' => options[:action] }
+    @validate = Validator.new
+    @validate.attrvalidate(options, attrcheck)
     case options[:action].downcase
     when 'create'
       create(options)
@@ -29,16 +28,14 @@ class ObjectStorageClient < OpcClient
     when 'delete'
       delete(options)
     else
-      abort('you entered an invalid selection for Action') 
+      abort('you entered an invalid selection for Action')
     end
   end
-  
-  def create(options)
+
+  def create(options) # rubocop:disable Metrics/AbcSize
     attrcheck = {
-      'container name'   => options[:container] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+      'container name' => options[:container] }
+    @validate.attrvalidate(options, attrcheck)
     newcontainer = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
     newcontainer = newcontainer.create(options[:container])
     if newcontainer.code == '201'
@@ -49,13 +46,13 @@ class ObjectStorageClient < OpcClient
     end # end of if
   end # end of method
 
-  def list(options)
+  def list(options) # rubocop:disable Metrics/AbcSize
     if options[:container]
       containerview = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
       containerview = containerview.contents(options[:container])
       if containerview.code == '201'
         puts containerview.code
-        puts containerview.body
+        containerview.body
       else
         abort(containerview.body)
       end # end of inside if
@@ -64,20 +61,18 @@ class ObjectStorageClient < OpcClient
       newcontainer = newcontainer.list
       if newcontainer.code == '200'
         puts newcontainer.code
-        puts newcontainer.body
+        newcontainer.body
       else
         abort(newcontainer.body) unless newcontainer.code == '204'
-        puts 'there are no containers' if newcontainer.code == '204'
+        'there are no containers' if newcontainer.code == '204'
       end # end of inside if
     end # end of outside if
   end # end of method
 
-  def delete(options)
+  def delete(options) # rubocop:disable Metrics/AbcSize
     attrcheck = {
       'container name'   => options[:container] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    @validate.attrvalidate(options, attrcheck)
     containerview = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
     containerview = containerview.delete(options[:container])
     if containerview.code == '204'
@@ -87,15 +82,13 @@ class ObjectStorageClient < OpcClient
     end # end of if
   end # end of method
 
-  def content_upload(args)
+  def content_upload(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
     options = inputparse.storage_create
     attrcheck = {
       'file_2_upload'   => options[:file_name],
       'object_2_create' => options[:object_name] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    @validate.attrvalidate(options, attrcheck)
     newcontent = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
     newcontent = newcontent.object_create(options[:file_name], options[:container], options[:object_name],
                                           options[:file_type])

@@ -47,7 +47,7 @@ class InputParse < OpcClient
       opts.on('-p', '--passwd PASS', 'Password for account') { |v| options[:passwd] = v }
       opts.on('-A', '--action ACTION', 'action options, stop, start, restart') { |v| options[:action] = v } unless caller == 'bkup'
       opts.on('-I', '--inst INST', 'Instance name') { |v| options[:inst] = v }
-      opts.on('-b', '--backup_id BACKUP_ID', 'backup ID') { |v| options[:backup_id] = v } if caller == 'bkup'
+      # opts.on('-b', '--backup_id BACKUP_ID', 'backup ID') { |v| options[:backup_id] = v } if caller == 'bkup'
       opts.on('-m', '--managed [MANG]', 'flag for managed instances') { |v| options[:mang] = v }
       opts.on('-h', '--help', 'Display this screen') do
         puts opts
@@ -98,7 +98,7 @@ class InputParse < OpcClient
     options
   end  # end of method
 
-  def jaas_manage # rubocop:disable Metrics/AbcSize
+  def manage # rubocop:disable Metrics/AbcSize
     options = {}
     OptionParser.new do |opts|
       opts.banner = 'Usage: example.rb [options]'
@@ -131,6 +131,7 @@ class InputParse < OpcClient
       opts.on('-C', '--container CONTAINER', 'Management Container Name for object') { |v| options[:container] = v }
       opts.on('-f', '--function FUNCTION', 'Management Container Name for object') { |v| options[:function] = v } if caller == 'networklist'
       opts.on('-A', '--action ACTION', 'action for the function, list or detail') { |v| options[:action] = v }
+      opts.on('-I', '--inst INST', 'Instance name') { |v| options[:inst] = v } if caller == 'orch'
       opts.on('-j', '--create_json JSON', 'json file to describe server') { |v| options[:create_json] = v }
       opts.on('--update_list x,y,z', Array, 'list of what fields to update field=value,field=value') do |list|
         options[:list] = list

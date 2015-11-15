@@ -29,6 +29,7 @@ class OpcClient
   require 'opc_client/datagrid_client'
   require 'opc_client/networklist'
   require 'opc_client/dbcs_client'
+  require 'opc_client/orch_client'
   require 'opc_client/backupmgr_client'
   require 'opc_client/inputparse'
   require 'opc_client/validator'

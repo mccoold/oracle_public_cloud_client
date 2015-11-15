@@ -14,34 +14,27 @@
 # limitations under the License.
 #
 class Validator < OpcClient
-  def attrvalidate(options, attrcheck)
+  def attrvalidate(options, attrcheck)  # rubocop:disable Metrics/AbcSize
     if options[:id_domain].nil?
       validateresponse = 'id domain is null, it can not be empty. use -h flag for list of arguements'
-      validate = true
-      return "#{validate}", "#{validateresponse}"
+      @validate = true
+      return "#{@validate}", "#{validateresponse}"
     elsif options[:passwd].nil?
       validateresponse = 'password is null, it can not be empty. use -h flag for list of arguements'
-      validate = true
-      return "#{validate}", "#{validateresponse}"
+      @validate = true
+      return "#{@validate}", "#{validateresponse}"
     elsif options[:user_name].nil?
       validateresponse = 'user name is null, it can not be empty. use -h flag for list of arguements'
-      validate = true
-      return "#{validate}", "#{validateresponse}"
+      @validate = true
+      return @validate, validateresponse
     elsif !attrcheck.nil?
       attrcheck.each do |key, attr|
-        if attr.nil?
-          validateresponse = "#{key}" + ' is null, it can not be empty. use -h flag for list of arguements'
-          validate = true
-          return "#{validate}", "#{validateresponse}"
-        end # end of if
+        next unless attr.nil?
+        abort(key + ' is null, it can not be empty. use -h flag for list of arguements')
       end # end of loop
       validateresponse = 'passed validator'
-      validate = false
-      return "#{validate}", "#{validateresponse}"
     else
       validateresponse = 'passed validator'
-      validate = false
-      return "#{validate}", "#{validateresponse}"
     end # end of if
   end # end of method
 end

@@ -14,7 +14,7 @@
 # limitations under the License
 #
 class SecIPListClient < OpcClient
-  def list(args)
+  def list(args) # rubocop:disable Metrics/AbcSize
     if caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
       # if the method is called directly from command line
       inputparse =  InputParse.new(args)
@@ -23,9 +23,8 @@ class SecIPListClient < OpcClient
         'Action'    => options[:action],
         'Instance'  => options[:rest_endpoint],
         'Container' => options[:container] }
-      validate = Validator.new
-      valid = validate.attrvalidate(options, attrcheck)
-      abort(valid.at(1)) if valid.at(0) == 'true'
+      @validate = Validator.new
+      @validate.attrvalidate(options, attrcheck)
     end # end of if
     options = args unless caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
     # allows method to be called by other methods
@@ -39,17 +38,16 @@ class SecIPListClient < OpcClient
     end # end of if
   end # end of method
 
-  def update(args)
+  def update(args) # rubocop:disable Metrics/AbcSize
     if caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
-       # if the method is called directly from command line the reason for the or is ruby 1.8 support
+      # if the method is called directly from command line the reason for the or is ruby 1.8 support
       inputparse =  InputParse.new(args)
       options = inputparse.compute('seciplist')
       attrcheck = {
         'Instance'  => options[:rest_endpoint],
         'Container' => options[:container] }
-      validate = Validator.new
-      valid = validate.attrvalidate(options, attrcheck)
-      abort(valid.at(1)) if valid.at(0) == 'true'
+      @validate = Validator.new
+      @validate.attrvalidate(options, attrcheck)
       networkconfig = SecIPList.new(options[:id_domain], options[:user_name], options[:passwd])
     end
     options = args unless caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?

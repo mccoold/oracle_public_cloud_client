@@ -18,9 +18,8 @@ class BackUpClient < OpcClient
     inputparse =  InputParse.new(args)
     options = inputparse.create
     attrcheck = { 'Action'    => options[:action] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    @validate = Validator.new
+    validattr = @validate.attrvalidate(options, attrcheck)
     case options[:action].downcase
     when 'config_list'
       config_list(options)
@@ -33,15 +32,14 @@ class BackUpClient < OpcClient
     when 'initiate'
       initiate(options)
     else
-      abort('you entered an invalid selection for Action')      
+      abort('you entered an invalid selection for Action')
     end # end case
   end # end method
 
   def list(options) # rubocop:disable Metrics/AbcSize
     result = BackUpManager.new(options[:id_domain], options[:user_name], options[:passwd])
     attrcheck = { 'Instance'    => options[:inst] }
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    @validate.attrvalidate(options, attrcheck)
     if options[:backup_id].nil?
       result = result.list(options[:inst], nil)
     else
@@ -56,8 +54,7 @@ class BackUpClient < OpcClient
 
   def config_list(options) # rubocop:disable Metrics/AbcSize
     attrcheck = { 'Instance'    => options[:inst] }
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    @validate.attrvalidate(options, attrcheck)
     result = BackUpManager.new(options[:id_domain], options[:user_name], options[:passwd])
     result = result.config_list(options[:inst])
     if result.code == '401' || result.code == '400' || result.code == '404'
@@ -71,8 +68,7 @@ class BackUpClient < OpcClient
   def config(options) # rubocop:disable Metrics/AbcSize
     attrcheck = { 'Instance'    => options[:inst],
                   'create_json' => options[:create_json] }
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    @validate.attrvalidate(options, attrcheck)
     file = File.read(options[:create_json])
     data_hash = JSON.parse(file)
     result = BackUpManager.new(options[:id_domain], options[:user_name], options[:passwd])
@@ -86,9 +82,9 @@ class BackUpClient < OpcClient
 
   def initiate(options) # rubocop:disable Metrics/AbcSize
     file = File.read(options[:create_json])
-    data_hash = JSON.parse(file)
+    bkup_json_hash = JSON.parse(file)
     result = BackUpManager.new(options[:id_domain], options[:user_name], options[:passwd])
-    result = result.initialize_backup(data_hash, options[:inst])
+    result = result.initialize_backup(bkup_json_hash, options[:inst])
     if result.code == '401' || result.code == '400' || result.code == '404'
       puts 'error, JSON was not returned  the http response code was' + result.code
     else
@@ -99,8 +95,7 @@ class BackUpClient < OpcClient
   def delete(options) # rubocop:disable Metrics/AbcSize
     attrcheck = { 'Instance'  => options[:inst],
                   'Backup'    => options[:backup_id]  }
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    @validate.attrvalidate(options, attrcheck)
     result = BackUpManager.new(options[:id_domain], options[:user_name], options[:passwd])
     result = result.delete(options[:inst], options[:backup_id])
     if result.code == '401' || result.code == '400' || result.code == '404'

@@ -14,15 +14,7 @@
 # limitations under the License
 #
 class SecAppClient < OpcClient
-  def discover(args)  # depricated needs to be deleted
-    inputparse =  InputParse.new(args)
-    options = inputparse.compute('secapp')
-    networkconfig = SecApp.new(options[:id_domain], options[:user_name], options[:passwd])
-    networkconfig = networkconfig.discover(options[:rest_endpoint], options[:container])
-    puts JSON.pretty_generate(JSON.parse(networkconfig.body))
-  end # end of method
-
-  def list(args)
+  def list(args)  # rubocop:disable Metrics/AbcSize
     if caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
       inputparse =  InputParse.new(args)
       options = inputparse.compute('secapp')
@@ -30,10 +22,9 @@ class SecAppClient < OpcClient
         'Action'    => options[:action],
         'Instance'  => options[:rest_endpoint],
         'Container' => options[:container] }
-      validate = Validator.new
-      valid = validate.attrvalidate(options, attrcheck)
-      abort(valid.at(1)) if valid.at(0) == 'true'
-    end # end of unless
+      @validate = Validator.new
+      @validate.attrvalidate(options, attrcheck)
+    end # end of if
     options = args unless caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
     case options[:action].downcase
     when 'list'
@@ -49,15 +40,15 @@ class SecAppClient < OpcClient
     end # end of case
   end # end of method
 
-  def modify(args)
+  def modify(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
     options = inputparse.compute('secapp')
     attrcheck = {
       'Action'    => options[:action],
       'Instance'  => options[:rest_endpoint] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    @validate = Validator.new
+    @validate.attrvalidate(options, attrcheck)
+    
     networkconfig = SecApp.new(options[:id_domain], options[:user_name], options[:passwd])
     case options[:action].downcase
     when 'create'

@@ -17,27 +17,24 @@ class DataGridClient < OpcClient
   def request_handler(args)
     inputparse =  InputParse.new(args)
     options = inputparse.create
-    attrcheck = { 'Action'    => options[:action] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    attrcheck = { 'Action'  => options[:action] }
+    @validate = Validator.new
+    @validate.attrvalidate(options, attrcheck)
     case options[:action]
     when 'create'
       create(options)
     when 'list'
       list(options)
     else
-      abort('you entered an invalid selection for Action') 
+      abort('you entered an invalid selection for Action')
     end
   end
-  
+
   def create(options) # rubocop:disable Metrics/AbcSize
-    attrcheck = {'Instance'      => options[:inst],
-                 'create_json'   => options[:create_json]
+    attrcheck = { 'Instance'      => options[:inst],
+                  'create_json'   => options[:create_json]
                 }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    @validate.attrvalidate(options, attrcheck)
     file = File.read(options[:create_json])
     data_hash = JSON.parse(file)
     dgcreate = DataGrid.new(options[:id_domain], options[:user_name], options[:passwd])
@@ -52,9 +49,7 @@ class DataGridClient < OpcClient
 
   def list(options) # rubocop:disable Metrics/AbcSize
     attrcheck = nil
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    @validate.attrvalidate(options, attrcheck)
     result = DataGrid.new(options[:id_domain], options[:user_name], options[:passwd])
     result = result.list
     if result.code == '401' || result.code == '400' || result.code == '404'
@@ -63,11 +58,10 @@ class DataGridClient < OpcClient
       JSON.pretty_generate(JSON.parse(result.body))
     end # end of if
   end # end of method
-  
+
   def delete(options) # rubocop:disable Metrics/AbcSize
     attrcheck = { 'Instance'  => options[:inst] }
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    @validate.attrvalidate(options, attrcheck)
     result = DataGrid.new(options[:id_domain], options[:user_name], options[:passwd])
     result = result.delete(options[:inst])
     if result.code == '401' || result.code == '400' || result.code == '404'

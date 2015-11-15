@@ -17,10 +17,9 @@ class PaasList < OpcClient
   def srvice_list(args)
     inputparse =  InputParse.new(args)
     options = inputparse.inst_list('list')
-    attrcheck = nil
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    attrcheck = {'Action' => options[:action] }
+    @validate = Validator.new
+    @validate.attrvalidate(options, attrcheck)
     util = PaasListUtil.new(options)
     util.util_service_list(SrvList)
   end  # end of method list
@@ -31,7 +30,7 @@ class PaasListUtil < OpcClient # search util class
     @options = options
   end
 
-  def util_service_list(function)
+  def util_service_list(function) # rubocop:disable Metrics/AbcSize
     result = function.new(@options[:id_domain], @options[:user_name], @options[:passwd])
     if @options[:inst]
       search = PaasListUtil.new(@options)
@@ -44,24 +43,24 @@ class PaasListUtil < OpcClient # search util class
     end # end of inst if
   end # end of method
 
-  def inst(result)
+  def inst(result) # rubocop:disable Metrics/AbcSize
     if @options[:mang]
       result = result.managed_list(@options[:inst])
       puts JSON.pretty_generate(result)
     else # inside mang else
       result = result.inst_list(@options[:action],  @options[:inst])
-      if @options[:action] == 'jcs'
+      if @options[:action].downcase == 'jcs'
         puts JSON.pretty_generate(JSON.parse(result.body)) unless result.code == '401' || result.code == '404'
         print 'error, JSON was not returned  the http response code was ' +
           result.code if result.code == '401' || result.code == '404'
-      elsif @options[:action] == 'dbcs'
+      elsif @options[:action].downcase == 'dbcs'
         unless result.code == '401' || result.code == '404'
-          results = JSON.parse(result.body)
-          ssh_host = (results['glassfish_url'])
+          result_json = JSON.parse(result.body)
+          ssh_host = (result_json['glassfish_url'])
           ssh_host.delete! 'https://'
           ssh_host.slice!('4848')
           puts "#{ssh_host}"
-          puts JSON.pretty_generate(results)
+          puts JSON.pretty_generate(result_json)
         end # end of unless
         print 'error, JSON was not returned  the http response code was ' +
           result.code if result.code == '401' || result.code == '404'

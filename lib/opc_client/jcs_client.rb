@@ -14,21 +14,20 @@
 # limitations under the License.
 #
 class JcsClient < OpcClient
-  def jaas_manage_client(args)
+  def jaas_manage_client(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
-    options = inputparse.jaas_manage
+    options = inputparse.manage
     attrcheck = {
       'Action'   => options[:action],
       'Instance' => options[:inst] }
-    validate = Validator.new
-    valid = validate.attrvalidate(options, attrcheck)
-    abort(valid.at(1)) if valid.at(0) == 'true'
+    @validate = Validator.new
+    @validate.attrvalidate(options, attrcheck)
     instmanage = JaasManager.new(options[:id_domain], options[:user_name], options[:passwd])
     case options[:action].downcase
     when  'stop', 'start'
       attrcheck = { 'Timeout' => options[:timeout] }
-      valid = validate.attrvalidate(options, attrcheck)
-      abort(valid.at(1)) if valid.at(0) == 'true'
+      @validate.attrvalidate(options, attrcheck)
+      
       result = instmanage.mngstate(options[:timeout], options[:inst], options[:action])
       result['location']
     when 'scaleup'
@@ -60,7 +59,7 @@ class JcsClient < OpcClient
       puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '200'
       puts 'error' + result.code unless result.code == '200'
     else
-      puts 'Invalid selection for action option ' + options[:action]
+      puts 'Invalid selection for action Option ' + options[:action]
     end # end of case
   end  # end of method manage
 end   # end of class

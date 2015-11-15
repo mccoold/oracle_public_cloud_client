@@ -14,7 +14,7 @@
 # limitations under the License
 #
 class SecRuleClient < OpcClient
-  def list(args)
+  def list(args)  # rubocop:disable Metrics/AbcSize
     if caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
       inputparse =  InputParse.new(args)
       options = inputparse.compute('secrule')
@@ -22,9 +22,8 @@ class SecRuleClient < OpcClient
         'Action'    => options[:action],
         'Instance'  => options[:rest_endpoint],
         'Container' => options[:container] }
-      validate = Validator.new
-      valid = validate.attrvalidate(options, attrcheck)
-      abort(valid.at(1)) if valid.at(0) == 'true'
+      @validate = Validator.new
+      @validate.attrvalidate(options, attrcheck)
     end
     options = args unless caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
     options[:action].downcase
@@ -37,18 +36,17 @@ class SecRuleClient < OpcClient
     end # end of if
   end # end of method
 
-  def update(args)
-    if caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1] == nil
+  def update(args)  # rubocop:disable Metrics/AbcSize
+    if caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
       inputparse =  InputParse.new(args)
       options = inputparse.compute('secrule')
       attrcheck = {
         'Instance'  => options[:rest_endpoint],
         'Container' => options[:container] }
-      validate = Validator.new
-      valid = validate.attrvalidate(options, attrcheck)
-      abort(valid.at(1)) if valid.at(0) == 'true'
+      @validate = Validator.new
+      @validate.attrvalidate(options, attrcheck)
     end
-    options = args unless caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1] == nil  
+    options = args unless caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
     networkconfig = SecRule.new(options[:id_domain], options[:user_name], options[:passwd])
     case options[:action]
     when 'update'
