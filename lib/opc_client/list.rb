@@ -16,44 +16,39 @@
 class PaasList < OpcClient
   def srvice_list(args)
     inputparse =  InputParse.new(args)
-    options = inputparse.inst_list('list')
-    attrcheck = {'Action' => options[:action] }
+    @options = inputparse.inst_list('list')
+    attrcheck = {'Action' => @options[:action] }
     @validate = Validator.new
-    @validate.attrvalidate(options, attrcheck)
-    util = PaasListUtil.new(options)
-    util.util_service_list(SrvList)
+    @validate.attrvalidate(@options, attrcheck)
+    #util = PaasListUtil.new(@options)
+    util_service_list
   end  # end of method list
-end # end of class
 
-class PaasListUtil < OpcClient # search util class
-  def initialize(options)
-    @options = options
-  end
-
-  def util_service_list(function) # rubocop:disable Metrics/AbcSize
-    result = function.new(@options[:id_domain], @options[:user_name], @options[:passwd])
+  def util_service_list # rubocop:disable Metrics/AbcSize
+    list_result = SrvList.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:action])
     if @options[:inst]
-      search = PaasListUtil.new(@options)
-      search.inst(result)
+      inst_list(list_result)
     else
-      result = result.service_list(@options[:action])
+      result = list_result.service_list
       print 'error, JSON was not returned  the http response code was ' +
         result.code if result.code == '401' || result.code == '404'
       JSON.pretty_generate(JSON.parse(result.body)) unless result.code == '401' || result.code == '404'
     end # end of inst if
   end # end of method
 
-  def inst(result) # rubocop:disable Metrics/AbcSize
-    if @options[:mang]
+  def inst_list(result) # rubocop:disable Metrics/AbcSize
+    if @options[:mang] == 'true'
       result = result.managed_list(@options[:inst])
-      puts JSON.pretty_generate(result)
+      puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '200'
+      puts 'error in requrest' + result.code unless result.code == '200'
     else # inside mang else
       result = result.inst_list(@options[:action],  @options[:inst])
-      if @options[:action].downcase == 'jcs'
-        puts JSON.pretty_generate(JSON.parse(result.body)) unless result.code == '401' || result.code == '404'
+      case @options[:action].downcase
+      when 'jcs', 'soa'
+        return JSON.pretty_generate(JSON.parse(result.body)) unless result.code == '401' || result.code == '404'
         print 'error, JSON was not returned  the http response code was ' +
           result.code if result.code == '401' || result.code == '404'
-      elsif @options[:action].downcase == 'dbcs'
+      when 'dbcs'
         unless result.code == '401' || result.code == '404'
           result_json = JSON.parse(result.body)
           ssh_host = (result_json['glassfish_url'])
@@ -66,7 +61,7 @@ class PaasListUtil < OpcClient # search util class
           result.code if result.code == '401' || result.code == '404'
       else
         puts 'what are you sending? It is not correct'
-      end # end of little if here
+      end # end of case
     end # end of inst if
   end # end of method
 end # end of class

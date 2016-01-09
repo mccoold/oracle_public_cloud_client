@@ -24,17 +24,16 @@ class PaasClient < OpcClient
     @validate = Validator.new
     @validate.attrvalidate(options, attrcheck)
     file = File.read(options[:create_json])
-    data_hash = JSON.parse(file)
-    opccreate = InstCreate.new(options[:id_domain], options[:user_name], options[:passwd])
-    createcall = opccreate.create(data_hash, options[:action])
+    create_data = JSON.parse(file)
+    opccreate = InstCreate.new(options[:id_domain], options[:user_name], options[:passwd], options[:action])
+    createcall = opccreate.create(create_data)
     if createcall.code == '400' || createcall.code == '404' || createcall.code == '401'
-      puts 'Error with the REST Call'
-      puts createcall.code
+      print 'Error with the REST Call http code '
+      print createcall.code
       puts createcall.body
     else
-      function = opccreate
       util = Utilities.new
-      util.create_result(options, createcall, function)
+      util.create_result(options, createcall, opccreate)
     end # end of main if
     # end # end of validator if
   end  # end create method
@@ -42,14 +41,15 @@ class PaasClient < OpcClient
   def delete(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
     options = inputparse.delete
-    attrcheck = { 'Instance' => options[:inst] }
+    attrcheck = { 'Instance' => options[:inst],
+                  'Action' => options[:action] }
     @validate = Validator.new
     @validate.attrvalidate(options, attrcheck)
     deleteconfig = File.read(options[:config]) if options[:action] == 'jcs'
     data_hash = JSON.parse(deleteconfig) if options[:action] == 'jcs'
-    deleteinst = InstDelete.new(options[:id_domain], options[:user_name], options[:passwd])
-    result = deleteinst.delete(options[:action], data_hash, options[:inst]) if options[:action] == 'jcs'
-    result = deleteinst.delete(options[:action], nil, options[:inst]) if options[:action] == 'dbcs'
+    deleteinst = InstDelete.new(options[:id_domain], options[:user_name], options[:passwd], options[:action])
+    result = deleteinst.delete(data_hash, options[:inst]) if options[:action] == 'jcs'
+    result = deleteinst.delete(nil, options[:inst]) if options[:action] == 'dbcs'
     puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '202'
     puts result.body + result.code unless result.code == '202'
   end # end of method

@@ -16,17 +16,11 @@
 class Validator < OpcClient
   def attrvalidate(options, attrcheck)  # rubocop:disable Metrics/AbcSize
     if options[:id_domain].nil?
-      validateresponse = 'id domain is null, it can not be empty. use -h flag for list of arguements'
-      @validate = true
-      return "#{@validate}", "#{validateresponse}"
+      abort('id domain is null, it can not be empty. use -h flag for list of arguements')
     elsif options[:passwd].nil?
-      validateresponse = 'password is null, it can not be empty. use -h flag for list of arguements'
-      @validate = true
-      return "#{@validate}", "#{validateresponse}"
+      abort('password is null, it can not be empty. use -h flag for list of arguements')
     elsif options[:user_name].nil?
-      validateresponse = 'user name is null, it can not be empty. use -h flag for list of arguements'
-      @validate = true
-      return @validate, validateresponse
+      abort('user name is null, it can not be empty. use -h flag for list of arguements')
     elsif !attrcheck.nil?
       attrcheck.each do |key, attr|
         next unless attr.nil?

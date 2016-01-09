@@ -1,4 +1,4 @@
 #! /usr/bin/ruby
 require 'opc_client'
 jcs = JcsClient.new
-puts jcs.jaas_manage_client(ARGV)
+puts jcs.request_handler(ARGV)

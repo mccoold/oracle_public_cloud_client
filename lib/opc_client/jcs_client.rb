@@ -14,52 +14,60 @@
 # limitations under the License.
 #
 class JcsClient < OpcClient
-  def jaas_manage_client(args) # rubocop:disable Metrics/AbcSize
+  def request_handler(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
-    options = inputparse.manage
-    attrcheck = {
-      'Action'   => options[:action],
-      'Instance' => options[:inst] }
+    @options = inputparse.manage
+    attrcheck = { 'Action' => @options[:action] }
     @validate = Validator.new
-    @validate.attrvalidate(options, attrcheck)
-    instmanage = JaasManager.new(options[:id_domain], options[:user_name], options[:passwd])
-    case options[:action].downcase
+    @validate.attrvalidate(@options, attrcheck)
+    @url = 'https://jaas.oraclecloud.com/paas/service/jcs/api/v1.1/instances/' if @options[:function] == 'jcs' || @options[:function].nil?
+    @url = 'https://jaas.oraclecloud.com/paas/service/soa/api/v1.1/instances/' if @options[:function] == 'soa'
+    jaas_manage_client
+  end
+  
+  attr_writer :url
+  
+  def jaas_manage_client # rubocop:disable Metrics/AbcSize
+    attrcheck = {
+      'Instance' => @options[:inst] }
+    @validate.attrvalidate(@options, attrcheck)
+    instmanage = JaasManager.new(@options[:id_domain], @options[:user_name], @options[:passwd])
+    instmanage.url = @url
+    instmanage.timeout = @options[:timeout] if @options[:timeout]
+    case @options[:action].downcase
     when  'stop', 'start'
-      attrcheck = { 'Timeout' => options[:timeout] }
-      @validate.attrvalidate(options, attrcheck)
-      
-      result = instmanage.mngstate(options[:timeout], options[:inst], options[:action])
+      result = instmanage.mngstate(@options[:inst], @options[:action])
       result['location']
     when 'scaleup'
-      result = instmanage.scale_up(options[:inst], options[:cluster_id])
+      result = instmanage.scale_up(@options[:inst], @options[:cluster_id])
       puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '202'
       puts result.body unless result.code == '202'
     when 'scalein'
-      result = instmanage.scale_in(options[:inst], options[:serverid])
+      result = instmanage.scale_in(@options[:inst], @options[:serverid])
       puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '202'
       puts result.body unless result.code == '202'
     when 'avail_patches'
-      result = instmanage.available_patches(options[:inst])
+      result = instmanage.available_patches(@options[:inst])
       puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '200'
       puts 'error' + result.code unless result.code == '200'
     when 'applied_patches'
-      result = instmanage.applied_patches(options[:inst])
+      result = instmanage.applied_patches(@options[:inst])
       puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '200'
       puts 'error' + result.code unless result.code == '200'
     when 'patch_precheck'
-      result = instmanage.patch_precheck(options[:inst], options[:patch_id])
+      result = instmanage.patch_precheck(@options[:inst], @options[:patch_id])
       puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '200'
       puts 'error' + result.code unless result.code == '200'
     when 'patch'
-      result = instmanage.patch(options[:inst], options[:patch_id])
+      result = instmanage.patch(@options[:inst], @options[:patch_id])
       puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '200'
       puts result.body unless result.code == '200'
     when 'patch_rollback'
-      result = instmanage.patch_rollback(options[:inst], options[:patch_id])
+      result = instmanage.patch_rollback(@options[:inst], @options[:patch_id])
       puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '200'
       puts 'error' + result.code unless result.code == '200'
     else
-      puts 'Invalid selection for action Option ' + options[:action]
+      puts 'Invalid selection for action Option ' + @options[:action]
     end # end of case
   end  # end of method manage
 end   # end of class
