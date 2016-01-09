@@ -1,0 +1,30 @@
+{
+  "serviceName": "serviceName",
+  "level": "PAAS",
+  "topology": "osb",
+  "subscriptionType": "MONTHLY",
+  "description": "My first instance using the REST API",
+  "provisionOTD": false,
+  "cloudStorageContainer": "Storage-iddomain/container",
+  "cloudStorageUser": "cloudStorageuser",
+  "cloudStoragePassword": "cloudStoragePassword",
+  "parameters": [
+    {
+      "version": "12.1.3",
+      "adminUserName": "weblogic",
+      "adminPassword": "welcome1",
+      "dbServiceName": "dbServiceName",
+      "dbaName": "sys",
+      "dbaPassword": "dbaPassword",
+      "shape": "oc1m",
+      "VMsPublicKey": "key",
+      "type": "weblogic"
+    },
+    {
+      "listenerPortsEnabled": true,
+      "loadBalancingPolicy": "LEAST_CONNECTION_COUNT",
+      "shape": "oc3",
+      "type": "OTD"
+    }
+  ]
+}
