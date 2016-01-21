@@ -25,6 +25,7 @@ class InputParse < OpcClient
       opts.banner = 'Usage: opccreate.rb [options]'
       opts.on('-i', '--id_domain ID_DOMAIN', 'id domain') { |id_domain| options[:id_domain] = id_domain  }
       opts.on('-u', '--user_name NAME', 'User name for account') { |v| options[:user_name] = v }
+      opts.on('-R', '--rest_endpoint REST_ENDPOINT', 'Rest end point') { |v| options[:rest_endpoint] = v }
       opts.on('-p', '--passwd PASS', 'Password for account') { |v| options[:passwd] = v }
       opts.on('-A', '--action ACTION', 'action options, stop, start, restart') { |v| options[:action] = v }
       opts.on('-I', '--inst INST', 'Instance name') { |v| options[:inst] = v }
@@ -46,6 +47,8 @@ class InputParse < OpcClient
       opts.on('-i', '--id_domain ID_DOMAIN', 'id domain') { |id_domain| options[:id_domain] = id_domain }
       opts.on('-u', '--user_name NAME', 'User name for account') { |v| options[:user_name] = v }
       opts.on('-p', '--passwd PASS', 'Password for account') { |v| options[:passwd] = v }
+      opts.on('-s', '--server SERVERID', 'server to be scaled in') { |v| options[:serverid] = v }
+      opts.on('-R', '--rest_endpoint REST_ENDPOINT', 'Rest end point') { |v| options[:rest_endpoint] = v }
       opts.on('-A', '--action ACTION', 'action options') { |v| options[:action] = v } unless caller == 'bkup'
       opts.on('-I', '--inst INST', 'Instance name') { |v| options[:inst] = v }
       options[:mang] = 'false'
@@ -65,6 +68,7 @@ class InputParse < OpcClient
       opts.on('-i', '--id_domain ID_DOMAIN', 'id domain') { |id_domain| options[:id_domain] = id_domain }
       opts.on('-u', '--user_name NAME', 'User name for account') { |v| options[:user_name] = v }
       opts.on('-p', '--passwd PASS', 'Password for account') { |v| options[:passwd] = v }
+      opts.on('-R', '--rest_endpoint REST_ENDPOINT', 'Rest end point') { |v| options[:rest_endpoint] = v }
       opts.on('-A', '--action ACTION', 'action options, jcs, dbcs, soa') { |v| options[:action] = v }
       opts.on('-I', '--inst INST', 'Instance name to be deleted') { |v| options[:inst] = v }
       opts.on('-c', '--config CONFIG', 'delete config JSON, for jsc only') { |v| options[:config] = v }
@@ -85,6 +89,7 @@ class InputParse < OpcClient
       opts.on('-i', '--id_domain ID_DOMAIN', 'id domain') { |id_domain| options[:id_domain] = id_domain }
       opts.on('-u', '--user_name NAME', 'User name for account') { |v| options[:user_name] = v }
       opts.on('-p', '--passwd PASS', 'Password for account') { |v| options[:passwd] = v }
+      opts.on('-R', '--rest_endpoint REST_ENDPOINT', 'Rest end point') { |v| options[:rest_endpoint] = v }
       opts.on('-A', '--action ACTION', 'action options, stop, start, restart') { |v| options[:action] = v }
       opts.on('-C', '--container CONTAINER', 'Container Name') { |v| options[:container] = v }
       opts.on('-f', '--file_name FILE_NAME', 'file to upload') { |v| options[:file_name] = v }
@@ -101,15 +106,20 @@ class InputParse < OpcClient
 
   def manage # rubocop:disable Metrics/AbcSize
     options = {}
+    
     OptionParser.new do |opts|
       opts.banner = 'Usage: example.rb [options]'
       opts.on('-i', '--id_domain ID_DOMAIN', 'id domain') { |id_domain| options[:id_domain] = id_domain }
       opts.on('-u', '--user_name NAME', 'User name for account') { |v| options[:user_name] = v }
       opts.on('-p', '--passwd PASS', 'Password for account') { |v| options[:passwd] = v }
       opts.on('-I', '--inst INST', 'Instance name') { |v| options[:inst] = v }
+      opts.on('-R', '--rest_endpoint REST_ENDPOINT', 'Rest end point') { |v| options[:rest_endpoint] = v }
       opts.on('-S', '--service SERVICE', 'Service to manage') { |v| options[:function] = v }
       opts.on('-T', '--timeout TIMEOUT', 'Instance name') { |v| options[:timeout] = v }
+      options[:mang] = 'false'
+      opts.on('-m', '--managed', 'flag for managed instances') do options[:mang] = 'true'  end
       opts.on('-n', '--cluster_name CLUSTER', 'cluster name') { |v| options[:cluster_id] = v }
+      opts.on('-t', '--track', 'track status of build') { |track| options[:track] = track  }
       opts.on('--patch_id PATCH_ID', 'patch id') { |v| options[:patch_id] = v }
       opts.on('-j', '--create_json JSON', 'json file to describe server') { |v| options[:create_json] = v }
       opts.on('-s', '--server SERVERID', 'server to be scaled in') { |v| options[:serverid] = v }

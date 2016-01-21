@@ -26,11 +26,12 @@ class PaasClient < OpcClient
     file = File.read(options[:create_json])
     create_data = JSON.parse(file)
     opccreate = InstCreate.new(options[:id_domain], options[:user_name], options[:passwd], options[:action])
+    opccreate.url = options[:rest_endpoint] if options[:rest_endpoint]
     createcall = opccreate.create(create_data)
     if createcall.code == '400' || createcall.code == '404' || createcall.code == '401'
       print 'Error with the REST Call http code '
       print createcall.code
-      puts createcall.body
+      abort(createcall.body)
     else
       util = Utilities.new
       util.create_result(options, createcall, opccreate)
@@ -48,6 +49,7 @@ class PaasClient < OpcClient
     deleteconfig = File.read(options[:config]) if options[:action] == 'jcs'
     data_hash = JSON.parse(deleteconfig) if options[:action] == 'jcs'
     deleteinst = InstDelete.new(options[:id_domain], options[:user_name], options[:passwd], options[:action])
+    deleteinst.url = options[:rest_endpoint] if options[:rest_endpoint]
     result = deleteinst.delete(data_hash, options[:inst]) if options[:action] == 'jcs'
     result = deleteinst.delete(nil, options[:inst]) if options[:action] == 'dbcs'
     puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '202'

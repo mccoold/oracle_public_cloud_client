@@ -29,7 +29,8 @@ class JcsClient < OpcClient
   
   def jaas_manage_client # rubocop:disable Metrics/AbcSize
     attrcheck = {
-      'Instance' => @options[:inst] }
+      'Instance' => @options[:inst],
+      'Service'  => @options[:function] }
     @validate.attrvalidate(@options, attrcheck)
     instmanage = JaasManager.new(@options[:id_domain], @options[:user_name], @options[:passwd])
     instmanage.url = @url
@@ -37,11 +38,25 @@ class JcsClient < OpcClient
     case @options[:action].downcase
     when  'stop', 'start'
       result = instmanage.mngstate(@options[:inst], @options[:action])
-      result['location']
+      puts result['location']
+      abort('Error' + result.code + '  ' + result.body) unless result.code == '202'
+      opccreate = InstCreate.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:function])
+      util = Utilities.new
+      util.create_result(@options, result, opccreate)
     when 'scaleup'
+      if @options[:mang] == 'false'
+        attrcheck = { 'create_json' => @options[:create_json] }
+        @validate.attrvalidate(@options, attrcheck)
+        file = File.read(@options[:create_json])
+        scale_data = JSON.parse(file)
+        instmanage.update_json = scale_data
+      end
+      attrcheck = {'cluster name' => @options[:cluster_id],
+                   'Inst ID'     => @options[:inst]}
+      @validate.attrvalidate(@options, attrcheck)
       result = instmanage.scale_up(@options[:inst], @options[:cluster_id])
       puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '202'
-      puts result.body unless result.code == '202'
+      abort('Error' + result.code + '  ' + result.body) unless result.code == '202'
     when 'scalein'
       result = instmanage.scale_in(@options[:inst], @options[:serverid])
       puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '202'

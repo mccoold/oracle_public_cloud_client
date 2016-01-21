@@ -34,6 +34,8 @@ class ComputeClient < OpcClient
     end # end case
   end # end method
 
+attr_writer :options
+
   def list # rubocop:disable Metrics/AbcSize
     attrcheck = {
       'REST end point'  => @options[:rest_endpoint],

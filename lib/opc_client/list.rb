@@ -20,12 +20,12 @@ class PaasList < OpcClient
     attrcheck = {'Action' => @options[:action] }
     @validate = Validator.new
     @validate.attrvalidate(@options, attrcheck)
-    #util = PaasListUtil.new(@options)
     util_service_list
   end  # end of method list
 
   def util_service_list # rubocop:disable Metrics/AbcSize
     list_result = SrvList.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:action])
+    list_result.url = @options[:rest_endpoint] if @options[:rest_endpoint]
     if @options[:inst]
       inst_list(list_result)
     else
@@ -38,11 +38,12 @@ class PaasList < OpcClient
 
   def inst_list(result) # rubocop:disable Metrics/AbcSize
     if @options[:mang] == 'true'
+      result.server_name = @options[:serverid] if @options[:serverid]
       result = result.managed_list(@options[:inst])
       puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '200'
       puts 'error in requrest' + result.code unless result.code == '200'
     else # inside mang else
-      result = result.inst_list(@options[:action],  @options[:inst])
+      result = result.inst_list(@options[:inst])
       case @options[:action].downcase
       when 'jcs', 'soa'
         return JSON.pretty_generate(JSON.parse(result.body)) unless result.code == '401' || result.code == '404'
@@ -60,7 +61,7 @@ class PaasList < OpcClient
         print 'error, JSON was not returned  the http response code was ' +
           result.code if result.code == '401' || result.code == '404'
       else
-        puts 'what are you sending? It is not correct'
+        print 'what are you sending? It is not correct'
       end # end of case
     end # end of inst if
   end # end of method

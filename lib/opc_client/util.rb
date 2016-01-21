@@ -16,16 +16,17 @@
 class Utilities < OpcClient
   def create_result(options, createcall, function)  # rubocop:disable Metrics/AbcSize
     res = JSON.parse(function.create_status(createcall['location']))
-    puts 'building ' + res['service_name']
+    puts 'building ' + res['service_name'] unless options[:action] == 'start' || options[:action] == 'stop'
+    puts JSON.pretty_generate(res) if options[:action] == 'start' || options[:action] == 'stop'
     if options[:track]
-      while res['status'] == 'In Progress'
+      while res['status'] == 'In Progress' || res['status'] == 'Provisioning completed'
         print '.'
         sleep 25
         res = JSON.parse(function.create_status(createcall['location']))
       end # end of while
-      result = SrvList.new(options[:id_domain], options[:user_name], options[:passwd])
+      result = SrvList.new(options[:id_domain], options[:user_name], options[:passwd], options[:action] )
       puts res['service_name']
-      result = result.inst_list(options[:action], res['service_name'])
+      result = result.inst_list(res['service_name'])
       puts JSON.pretty_generate(JSON.parse(result.body))
     end # end of track if
   end # end of method

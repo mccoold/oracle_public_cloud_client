@@ -27,21 +27,20 @@ class DbcsClient < OpcClient
     case options[:action].downcase
     when  'stop', 'start'
       result = instmanage.power(options[:inst], options[:action])
-      if result.code == '401'
-        puts 'authentication failed'
-      elsif result.code == '404'
-        puts 'instance not found'
-      else
-        result['Location']
-      end
+      abort(result.body) unless result.code == '202'
+      opccreate = InstCreate.new(options[:id_domain], options[:user_name], options[:passwd], 'dbcs')
+      util = Utilities.new
+      util.create_result(options, result, opccreate)
     when 'scaleup'
+      attrcheck = { 'scale json'  => options[:create_json] }
+      @validate.attrvalidate(options, attrcheck)
       file = File.read(options[:create_json])
       scaling = JSON.parse(file)
-      result = instmanage.scale_up(scaling, options[:inst], options[:cluster_id])
+      result = instmanage.scale_up(scaling, options[:inst])
       if result.code == '202'
         JSON.pretty_generate(JSON.parse(result.body))
       else
-        result.body
+        abort('Error ' +result.code + '  ' + result.body)
       end # end of if
     end # end of case
   end  # end of method manage

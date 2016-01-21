@@ -1,0 +1,5 @@
+{
+   "additionalStorage": "1",
+   "scalingVolume" : "backup",
+   "shape": "oc4"
+}
