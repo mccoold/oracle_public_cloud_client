@@ -21,7 +21,7 @@ _Note: This page is the same as the file in the Gem_
 
 **Java Cloud Service**
 
-* jcsmanage -u _username_ -i _identity_domain_ -p _password_ -I _instance name_ -A (available actions: stop, start, scaleup, scalein(requires --server_id), avail_patches, applied_patches, patch_precheck(requires --patch_id), patch(requires --patch_id), patch_rollback(requires --patch_id))_
+* jcsmanage -u _username_ -i _identity_domain_ -p _password_ -I _instance name_ -A (available actions: stop, start, scaleup, scalein(requires --server_id), avail_patches, applied_patches, patch_precheck(requires --patch_id), patch(requires --patch_id), patch_rollback(requires --patch_id))_ -S _service_ (available services jcs, soa)
 * jcsbackup -u _username_ -i _identity_domain_ -p _password_ -I _instance name_ -A (available actions: list, create, initiate, config_list, delete)
    * -j _JSONFILE_  for create
 * datagrid -u _username_ -i _identity_domain_ -p _password_ -I _instance name_ -A (available actions: list,
@@ -30,7 +30,7 @@ create,  config_list, delete)
 
 **Database Cloud Service**
 
- * dbcsmanage -u _username_ -i _identity_domain_ -p _password_  -I _instance name_ -A _action (available actions: stop, start, scaleup, scalein(requires --server_id), avail_patches, applied_patches, patch_precheck(requires --patch_id), patch(requires --patch_id), patch_rollback(requires --patch_id))_
+ * dbcsmanage -u _username_ -i _identity_domain_ -p _password_  -I _instance name_ -A _action (available actions: stop, start, scaleup (requires --server_id), avail_patches, applied_patches, patch_precheck(requires --patch_id), patch(requires --patch_id), patch_rollback(requires --patch_id))_
    
 **IaaS Services**
 
@@ -48,3 +48,7 @@ Containers always start with a "/" the base container for all of your objects is
     * for update: --update_list _comma separated value pair of fields to be updated disabled=false,..._
  * network -u _username_ -i _identity_domain_ -p _password_ -R _RESTAPI_ -j _json file_ 
      * operations determined by JSON file, can create and delete any Network object or objects in sequence with one file, see examples in JSON-EXAMPLES folder
+ * computeinst  -u _username_ -i _identity_domain_ -p _password_ -R _RESTAPI_ -A _action_ (list)
+ * onjstrg -u _username_ -i _identity_domain_ -p _password_ -A _action_ (list, create, delete)
+     * for create and delete: -C _container_
+     * to see the contents of a container -C _container_
