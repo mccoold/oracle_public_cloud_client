@@ -12,6 +12,7 @@ Gem::Specification.new do |s|
   s.license = 'Apache-2.0'
   s.required_ruby_version = '>= 1.8'
   s.add_dependency('OPC', '~> 0.3.0')
+  s.add_dependency('json')
   s.executables = ['opclist','opcdelete', 'jcsmanage', 'opccreate', 'objstrg', 'ntwrk_app_updt', 'network',
                    'datagrid', 'dbcsmanage', 'jcsbkup', 'encrypt', 'opccompute', 'ntwrk_lst', 'blockstorage',
                    'ntwrk_rule_updt','orch_client']
