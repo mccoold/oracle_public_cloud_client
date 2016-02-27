@@ -89,6 +89,7 @@ class InputParse < OpcClient
       opts.on('-i', '--id_domain ID_DOMAIN', 'id domain') { |id_domain| options[:id_domain] = id_domain }
       opts.on('-u', '--user_name NAME', 'User name for account') { |v| options[:user_name] = v }
       opts.on('-p', '--passwd PASS', 'Password for account') { |v| options[:passwd] = v }
+      opts.on('-r', '--recursive', 'flag for recursive delete') { |v| options[:recurse] = v } # for object storage
       opts.on('-R', '--rest_endpoint REST_ENDPOINT', 'Rest end point') { |v| options[:rest_endpoint] = v }
       opts.on('-A', '--action ACTION', 'action options, stop, start, restart') { |v| options[:action] = v }
       opts.on('-C', '--container CONTAINER', 'Container Name') { |v| options[:container] = v }
@@ -143,6 +144,7 @@ class InputParse < OpcClient
       opts.on('-C', '--container CONTAINER', 'Management Container Name for object') { |v| options[:container] = v }
       opts.on('-F', '--function FUNCTION', 'Management Container Name for object') { |v| options[:function] = v } if caller == 'networklist'
       opts.on('-A', '--action ACTION', 'action for the function, list or detail') { |v| options[:action] = v }
+      opts.on('-t', '--track', 'track status of build') { |track| options[:track] = track  }
       opts.on('-I', '--inst INST', 'Instance name') { |v| options[:inst] = v } if caller == 'orch' || caller == 'compute'
       opts.on('-j', '--create_json JSON', 'json file to describe server') { |v| options[:create_json] = v }
       opts.on('--update_list x,y,z', Array, 'list of what fields to update field=value,field=value') do |list|

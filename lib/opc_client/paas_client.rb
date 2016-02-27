@@ -29,9 +29,8 @@ class PaasClient < OpcClient
     opccreate.url = options[:rest_endpoint] if options[:rest_endpoint]
     createcall = opccreate.create(create_data)
     if createcall.code == '400' || createcall.code == '404' || createcall.code == '401'
-      print 'Error with the REST Call http code '
-      print createcall.code
-      abort(createcall.body)
+      abort('Error with the REST Call http code ' + createcall.code) unless createcall.body
+      abort('Error with the REST Call http code ' + createcall.code + createcall.body) if createcall.body
     else
       util = Utilities.new
       util.create_result(options, createcall, opccreate)

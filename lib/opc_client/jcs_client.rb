@@ -24,9 +24,9 @@ class JcsClient < OpcClient
     @url = 'https://jaas.oraclecloud.com/paas/service/soa/api/v1.1/instances/' if @options[:function] == 'soa'
     jaas_manage_client
   end
-  
+
   attr_writer :url
-  
+
   def jaas_manage_client # rubocop:disable Metrics/AbcSize
     attrcheck = {
       'Instance' => @options[:inst],
@@ -51,8 +51,9 @@ class JcsClient < OpcClient
         scale_data = JSON.parse(file)
         instmanage.update_json = scale_data
       end
-      attrcheck = {'cluster name' => @options[:cluster_id],
-                   'Inst ID'     => @options[:inst]}
+      attrcheck = { 'cluster name' => @options[:cluster_id],
+                    'Inst ID'      => @options[:inst]
+      }
       @validate.attrvalidate(@options, attrcheck)
       result = instmanage.scale_up(@options[:inst], @options[:cluster_id])
       puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '202'

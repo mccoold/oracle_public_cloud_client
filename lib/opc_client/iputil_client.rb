@@ -14,67 +14,73 @@
 # limitations under the License
 #
 class IPUtilClient < OpcClient
-  
-  def list(args) # rubocop:disable Metrics/AbcSize
-    if caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
-      inputparse =  InputParse.new(args)
-      options = inputparse.compute('iputil')
-      attrcheck = {
-        'Action'    => options[:action],
-        'Instance'  => options[:rest_endpoint],
-        'Container' => options[:container] }
-        @validate = Validator.new
-      @validate.attrvalidate(options, attrcheck)
-    end
-    options = args unless caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
-    function = 'association' if options[:function] == 'ip_association'
-    function = 'reservation' if options[:function] == 'ip_reservation'
-    options[:action].downcase
-    if options[:action] == 'list' || options[:action] == 'details'
-      networkconfig = IPUtil.new(options[:id_domain], options[:user_name], options[:passwd])
-      networkconfig = networkconfig.discover(options[:rest_endpoint], options[:container], options[:action], function)
-      puts JSON.pretty_generate(JSON.parse(networkconfig.body))
-    else
-      puts 'Invalid entry for action, please use details or list'
-    end # end of if
-  end # end of method
-
-  def update(args) # rubocop:disable Metrics/AbcSize
+  def request_handler(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
-    options = inputparse.compute('iputil')
-    attrcheck = {
-      'Instance'  => options[:rest_endpoint],
-      'Container' => options[:container] }
+    @options = inputparse.compute('iputil')
+    attrcheck = { 'Action' => @options[:action],
+                  'RestEndPoint' => @options[:rest_endpoint],
+                  'Function' => @options[:function]
+    }
     @validate = Validator.new
-    @validate.attrvalidate(options, attrcheck)
-    networkconfig = IPUtil.new(options[:id_domain], options[:user_name], options[:passwd])
-    case options[:action].downcase
-    when 'update'
-      key_sep = '='
-      updates = {}
-      options[:list].each do |v|
-        key_value = v.split(key_sep)
-        updates[key_value.at(0)] = key_value.at(1)
-      end # end of parsing through the update parameters
-      networklist = networkconfig.list(options[:rest_endpoint], options[:container])
-      data = JSON.parse(networklist.body).first
-      data1 = data.at(1)
-      update = data1.at(0)
-      updates.each do |k, v|
-        update[k] = v
-      end
-      networkupdate = networkconfig.update(options[:rest_endpoint], options[:container], options[:action], update)
-      JSON.pretty_generate(JSON.parse(networkupdate.body))
+    @validate.attrvalidate(@options, attrcheck)
+    case @options[:action].downcase
+    when 'list', 'details'
+      list
     when 'create'
-      file = File.read(options[:create_json])
-      update = JSON.parse(file)
-      networkupdate = networkconfig.update(options[:rest_endpoint], options[:container], options[:action], update)
-      JSON.pretty_generate(JSON.parse(networkupdate.body))
+      create
     when 'delete'
-      networkupdate = networkconfig.update(options[:rest_endpoint], options[:container], options[:action])
-      JSON.pretty_generate(JSON.parse(networkupdate.body))
+      delete
+    when 'update'
+      update
     else
       abort('You entered an invalid selection for Action')
-    end # end of case
+    end # end case
+    @iputil = IPUtil.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:rest_endpoint])
+    @function = 'association' if @options[:function] == 'ip_association'
+    @function = 'reservation' if @options[:function] == 'ip_reservation'
+  end # end method
+
+  attr_writer :options
+
+  def list # rubocop:disable Metrics/AbcSize
+    attrcheck = { 'Container' => @options[:container] }
+    @validate.attrvalidate(@options, attrcheck)
+    networkconfig = @iputil.list(@options[:container], @options[:action], @function)
+    puts JSON.pretty_generate(JSON.parse(networkconfig.body))
+  end # end of method
+
+  def update # rubocop:disable Metrics/AbcSize
+    attrcheck = { 'Container' => @options[:container] }
+    @validate.attrvalidate(@options, attrcheck)
+    key_sep = '='
+    updates = {}
+    @options[:list].each do |v|
+      key_value = v.split(key_sep)
+      updates[key_value.at(0)] = key_value.at(1)
+    end # end of parsing through the update parameters
+    networklist = @iputil.list(@options[:container])
+    data = JSON.parse(networklist.body).first
+    data1 = data.at(1)
+    update = data1.at(0)
+    updates.each do |k, v|
+      update[k] = v
+    end
+    networkupdate.create_json = update
+    networkupdate = @iputil.update(@options[:action], @function)
+    JSON.pretty_generate(JSON.parse(networkupdate.body))
+  end # end of method
+
+  def create
+    file = File.read(@options[:create_json])
+    update = JSON.parse(file)
+    networkupdate.create_json = update
+    networkupdate = @iputil.update(@options[:action], @function)
+    JSON.pretty_generate(JSON.parse(networkupdate.body))
+  end # end of method
+
+  def delete
+    networkupdate.ipcontainer_name = @options[:container]
+    networkupdate = @iputil.update(@options[:action], @function)
+    JSON.pretty_generate(JSON.parse(networkupdate.body))
   end # end of method
 end

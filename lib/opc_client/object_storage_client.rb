@@ -16,48 +16,50 @@
 class ObjectStorageClient < OpcClient
   def request_handler(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
-    options = inputparse.storage_create
-    attrcheck = { 'Action' => options[:action] }
+    @options = inputparse.storage_create
+    attrcheck = { 'Action' => @options[:action] }
     @validate = Validator.new
-    @validate.attrvalidate(options, attrcheck)
-    case options[:action].downcase
+    @validate.attrvalidate(@options, attrcheck)
+    case @options[:action].downcase
     when 'create'
-      create(options)
+      create
     when 'list'
-      list(options)
+      list
     when 'delete'
-      delete(options)
+      delete
     else
       abort('you entered an invalid selection for Action')
     end
   end
 
-  def create(options) # rubocop:disable Metrics/AbcSize
+  def create # rubocop:disable Metrics/AbcSize
     attrcheck = {
-      'container name' => options[:container] }
-    @validate.attrvalidate(options, attrcheck)
-    newcontainer = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
-    newcontainer = newcontainer.create(options[:container])
+      'container name' => @options[:container] }
+    @validate.attrvalidate(@options, attrcheck)
+    newcontainer = ObjectStorage.new(@options[:id_domain], @options[:user_name], @options[:passwd])
+    newcontainer = newcontainer.create(@options[:container])
     if newcontainer.code == '201'
       puts newcontainer.code
-      puts "Container #{options[:container]} created"
+      puts "Container #{@options[:container]} created"
     else
       puts newcontainer.body
     end # end of if
   end # end of method
 
-  def list(options) # rubocop:disable Metrics/AbcSize
-    if options[:container]
-      containerview = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
-      containerview = containerview.contents(options[:container])
-      if containerview.code == '201'
+  def list # rubocop:disable Metrics/AbcSize
+    if @options[:container]
+      containerview = ObjectStorage.new(@options[:id_domain], @options[:user_name], @options[:passwd])
+      containerview = containerview.contents(@options[:container])
+      if containerview.code == '201' || containerview.code == '200'
         puts containerview.code
         containerview.body
+      elsif containerview.code == '204'
+        print 'the container is empty'
       else
         abort(containerview.body)
       end # end of inside if
     else
-      newcontainer = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
+      newcontainer = ObjectStorage.new(@options[:id_domain], @options[:user_name], @options[:passwd])
       newcontainer = newcontainer.list
       if newcontainer.code == '200'
         puts newcontainer.code
@@ -69,14 +71,22 @@ class ObjectStorageClient < OpcClient
     end # end of outside if
   end # end of method
 
-  def delete(options) # rubocop:disable Metrics/AbcSize
+  def delete # rubocop:disable Metrics/AbcSize
     attrcheck = {
-      'container name'   => options[:container] }
-    @validate.attrvalidate(options, attrcheck)
-    containerview = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
-    containerview = containerview.delete(options[:container])
+      'container name'   => @options[:container] }
+    @validate.attrvalidate(@options, attrcheck)
+    containerview = ObjectStorage.new(@options[:id_domain], @options[:user_name], @options[:passwd])
+    if @options[:recurse]
+      contents = containerview.contents(@options[:container])
+      container_contents = contents.body.split(/\n/)
+      container_contents.each do |content|
+        containerview.delete_content(@options[:container], content)
+        puts 'deleted ' + content
+      end  
+    end
+    containerview = containerview.delete(@options[:container])
     if containerview.code == '204'
-      puts "Container #{options[:container]} deleted"
+      puts "Container #{@options[:container]} deleted"
     else
       puts containerview.body
     end # end of if
@@ -84,17 +94,17 @@ class ObjectStorageClient < OpcClient
 
   def content_upload(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
-    options = inputparse.storage_create
+    @options = inputparse.storage_create
     attrcheck = {
-      'file_2_upload'   => options[:file_name],
-      'object_2_create' => options[:object_name] }
-    @validate.attrvalidate(options, attrcheck)
-    newcontent = ObjectStorage.new(options[:id_domain], options[:user_name], options[:passwd])
-    newcontent = newcontent.object_create(options[:file_name], options[:container], options[:object_name],
-                                          options[:file_type])
+      'file_2_upload'   => @options[:file_name],
+      'object_2_create' => @options[:object_name] }
+    @validate.attrvalidate(@options, attrcheck)
+    newcontent = ObjectStorage.new(@options[:id_domain], @options[:user_name], @options[:passwd])
+    newcontent = newcontent.object_create(@options[:file_name], @options[:container], @options[:object_name],
+                                          @options[:file_type])
     if newcontent.code == '201'
       puts newcontent.code
-      puts "Object #{options[:file_name]} has been created in container #{options[:container]}"
+      puts "Object #{@options[:file_name]} has been created in container #{@options[:container]}"
     else
       puts newcontent.body
     end # end of if

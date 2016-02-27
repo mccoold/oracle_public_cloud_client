@@ -42,7 +42,8 @@ class NetworkList < OpcClient
       secassocc.list(options)
     when 'ip_reservation', 'ip_association'
       iputilc = IPUtilClient.new
-      iputilc.list(options)
+      iputilc.options = options
+      iputilc.list
     else
       abort('You entered an invalid selection for Function')
     end # end of case

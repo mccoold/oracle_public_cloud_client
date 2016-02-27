@@ -100,19 +100,21 @@ class Network < OpcClient
             puts 'deleted Secassoc ' + json_top_level.at(1)['Parameters']['name'] if networkconfig.code == '204'
           end
         elsif network_category == 'ip'
-          networkconfig = IPUtil.new(options[:id_domain], options[:user_name], options[:passwd])
+          networkconfig = IPUtil.new(options[:id_domain], options[:user_name], options[:passwd], options[:rest_endpoint])
           callclass = category_instance.at(1)['Class']
           case category_instance.at(1)['Action']
           when 'create'
+            networkconfig.create_json =  category_instance.at(1)['Parameters']
+            networkconfig = networkconfig.update('create', callclass)
             puts 'created'
-            networkconfig = networkconfig.update(options[:rest_endpoint], nil, 'create', callclass, category_instance.at(1)['Parameters'])
-            puts JSON.pretty_generate(JSON.parse(networkconfig.body))
+            return JSON.pretty_generate(JSON.parse(networkconfig.body))
           when 'modify'
             puts 'not fully available yet'
           when 'delete'
-            networkconfig = networkconfig.update(options[:rest_endpoint], category_instance.at(1)['Parameters']['name'], 'delete',
+            networkconfig.ipcontainer_name = category_instance.at(1)['Parameters']['name']
+            networkconfig = networkconfig.update('delete',
                                                  callclass, category_instance.at(1)['Parameters'])
-            puts 'deleted IP ' + callclass + ' ' + category_instance.at(1)['Parameters']['name'] if networkconfig.code == '204'
+            return 'deleted IP ' + callclass + ' ' + category_instance.at(1)['Parameters']['name'] if networkconfig.code == '204'
           end # end of case
         end # end of if
       end # end of json_top_level loop

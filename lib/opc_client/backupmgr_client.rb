@@ -19,8 +19,8 @@ class BackUpClient < OpcClient
     options = inputparse.create
     attrcheck = { 'Action'    => options[:action] }
     @validate = Validator.new
-    validattr = @validate.attrvalidate(options, attrcheck)
-    @url = 'https://jaas.oraclecloud.com/paas/service/jcs/api/v1.1/instances/' if @options[:function] == 'jcs' || @options[:function] == nil
+    @validate.attrvalidate(options, attrcheck)
+    @url = 'https://jaas.oraclecloud.com/paas/service/jcs/api/v1.1/instances/' if @options[:function] == 'jcs' || @options[:function].nil?
     @url = 'https://jaas.oraclecloud.com/paas/service/soa/api/v1.1/instances/' if @options[:function] == 'soa'
     case options[:action].downcase
     when 'config_list'
@@ -38,7 +38,7 @@ class BackUpClient < OpcClient
     end # end case
   end # end method
 
-attr_writer :url
+  attr_writer :url
 
   def list(options) # rubocop:disable Metrics/AbcSize
     result = BackUpManager.new(options[:id_domain], options[:user_name], options[:passwd])

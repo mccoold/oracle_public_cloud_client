@@ -17,7 +17,7 @@ class PaasList < OpcClient
   def srvice_list(args)
     inputparse =  InputParse.new(args)
     @options = inputparse.inst_list('list')
-    attrcheck = {'Action' => @options[:action] }
+    attrcheck = { 'Action' => @options[:action] }
     @validate = Validator.new
     @validate.attrvalidate(@options, attrcheck)
     util_service_list
@@ -47,8 +47,8 @@ class PaasList < OpcClient
       case @options[:action].downcase
       when 'jcs', 'soa'
         return JSON.pretty_generate(JSON.parse(result.body)) unless result.code == '401' || result.code == '404'
-        print 'error, JSON was not returned  the http response code was ' +
-          result.code if result.code == '401' || result.code == '404'
+        abort('error, JSON was not returned  the http response code was ' +
+        result.code) if result.code == '401' || result.code == '404'
       when 'dbcs'
         unless result.code == '401' || result.code == '404'
           result_json = JSON.parse(result.body)
@@ -58,8 +58,8 @@ class PaasList < OpcClient
           puts "#{ssh_host}"
           puts JSON.pretty_generate(result_json)
         end # end of unless
-        print 'error, JSON was not returned  the http response code was ' +
-          result.code if result.code == '401' || result.code == '404'
+        abort('error, JSON was not returned  the http response code was ' +
+          result.code) if result.code == '401' || result.code == '404'
       else
         print 'what are you sending? It is not correct'
       end # end of case

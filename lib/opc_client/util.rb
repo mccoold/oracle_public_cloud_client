@@ -15,18 +15,28 @@
 #
 class Utilities < OpcClient
   def create_result(options, createcall, function)  # rubocop:disable Metrics/AbcSize
-    res = JSON.parse(function.create_status(createcall['location']))
-    puts 'building ' + res['service_name'] unless options[:action] == 'start' || options[:action] == 'stop'
-    puts JSON.pretty_generate(res) if options[:action] == 'start' || options[:action] == 'stop'
+    status_object = function.create_status(createcall['location'])
+    status_message =  status_object.body # have to break all the calls out for error handling,
+    # The REST end point tends not to be consistant
+    status_message_status = JSON.parse(status_message) if status_object.code == '202'
+    puts 'building ' + status_message_status['service_name'] unless options[:action] == 'start' || options[:action] == 'stop'
+    puts JSON.pretty_generate(status_message_status) if options[:action] == 'start' || options[:action] == 'stop'
     if options[:track]
-      while res['status'] == 'In Progress' || res['status'] == 'Provisioning completed'
+      breakout = 1
+      while status_message_status['status'] == 'In Progress' || status_message_status['status'] == 'Provisioning completed'
         print '.'
         sleep 25
-        res = JSON.parse(function.create_status(createcall['location']))
+        status_object = function.create_status(createcall['location'])
+        status_message =  status_object.body
+        status_message_status = JSON.parse(status_message) if status_object.code == '202' || status_object.code == '200'
+        if status_object.code == '500'
+          breakkout++
+          abort('Rest calls failing 5 times ' + status_object.code) if breakout == 5
+        end # end of if
       end # end of while
-      result = SrvList.new(options[:id_domain], options[:user_name], options[:passwd], options[:action] )
-      puts res['service_name']
-      result = result.inst_list(res['service_name'])
+      result = SrvList.new(options[:id_domain], options[:user_name], options[:passwd], options[:action])
+      puts status_message_status['service_name']
+      result = result.inst_list(status_message_status['service_name'])
       puts JSON.pretty_generate(JSON.parse(result.body))
     end # end of track if
   end # end of method
