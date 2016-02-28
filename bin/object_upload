@@ -1,4 +1,0 @@
-#! /usr/bin/ruby
-require 'opc_client'
-content = ObjectStorageClient.new
-puts content.content_upload(ARGV)

@@ -1,4 +1,0 @@
-#! /usr/bin/ruby
-require 'opc_client'
-network = SecListClient.new
-puts network.list(ARGV)

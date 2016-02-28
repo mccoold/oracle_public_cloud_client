@@ -1,4 +1,0 @@
-#! /usr/bin/ruby
-require 'opc_client'
-jcs = BackUpClient.new
-puts jcs.jcsbackup_list(ARGV)

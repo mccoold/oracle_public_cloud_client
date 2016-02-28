@@ -1,4 +1,0 @@
-#! /usr/bin/ruby
-require 'opc_client'
-compute = ComputeClient.new
-puts compute.instance_list(ARGV)
