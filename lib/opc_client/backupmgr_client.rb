@@ -16,97 +16,86 @@
 class BackUpClient < OpcClient
   def request_handler(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
-    options = inputparse.create
-    attrcheck = { 'Action'    => options[:action] }
+    @options = inputparse.create
+    option_parse
+  end
+  
+  def option_parse
+    @util = Utilities.new
+    attrcheck = { 'Action'    => @options[:action] }
     @validate = Validator.new
-    @validate.attrvalidate(options, attrcheck)
+    @validate.attrvalidate(@options, attrcheck)
     @url = 'https://jaas.oraclecloud.com/paas/service/jcs/api/v1.1/instances/' if @options[:function] == 'jcs' || @options[:function].nil?
     @url = 'https://jaas.oraclecloud.com/paas/service/soa/api/v1.1/instances/' if @options[:function] == 'soa'
-    case options[:action].downcase
+    case @options[:action].downcase
     when 'config_list'
-      config_list(options)
+      config_list
     when 'list'
-      list(options)
+      list
     when 'delete'
-      delete(options)
+      delete
     when 'config'
-      config(options)
+      config
     when 'initiate'
-      initiate(options)
+      initiate
     else
       abort('you entered an invalid selection for Action')
     end # end case
   end # end method
 
-  attr_writer :url
+  attr_writer :url, :options
 
-  def list(options) # rubocop:disable Metrics/AbcSize
-    result = BackUpManager.new(options[:id_domain], options[:user_name], options[:passwd])
+  def list # rubocop:disable Metrics/AbcSize
+    result = BackUpManager.new(@options[:id_domain], @options[:user_name], @options[:passwd])
     result.url = @url
-    attrcheck = { 'Instance'  => options[:inst] }
-    @validate.attrvalidate(options, attrcheck)
-    if options[:backup_id].nil?
-      result = result.list(options[:inst], nil)
+    attrcheck = { 'Instance'  => @options[:inst] }
+    @validate.attrvalidate(@options, attrcheck)
+    if @options[:backup_id].nil?
+      result = result.list(@options[:inst], nil)
     else
-      result = result.list(options[:inst], options[:backup_id])
+      result = result.list(@options[:inst], @options[:backup_id])
     end
-    if result.code == '401' || result.code == '400' || result.code == '404'
-      puts 'error, JSON was not returned  the http response code was' + result.code
-    else
-      JSON.pretty_generate(JSON.parse(result.body))
-    end # end of if
+    @util.response_handler(result)
+    JSON.pretty_generate(JSON.parse(result.body))
   end # end of method
 
-  def config_list(options) # rubocop:disable Metrics/AbcSize
-    attrcheck = { 'Instance'    => options[:inst] }
-    @validate.attrvalidate(options, attrcheck)
-    result = BackUpManager.new(options[:id_domain], options[:user_name], options[:passwd])
-    result = result.config_list(options[:inst])
-    if result.code == '401' || result.code == '400' || result.code == '404'
-      puts 'error, JSON was not returned  the http response code was'
-      puts result.code
-    else
-      JSON.pretty_generate(JSON.parse(result.body))
-    end # end of if
+  def config_list # rubocop:disable Metrics/AbcSize
+    attrcheck = { 'Instance'    => @options[:inst] }
+    @validate.attrvalidate(@options, attrcheck)
+    result = BackUpManager.new(@options[:id_domain], @options[:user_name], @options[:passwd])
+    result = result.config_list(@options[:inst])
+    @util.response_handler(result)
+    JSON.pretty_generate(JSON.parse(result.body))
   end # end of method
 
-  def config(options) # rubocop:disable Metrics/AbcSize
-    attrcheck = { 'Instance'    => options[:inst],
-                  'create_json' => options[:create_json] }
-    @validate.attrvalidate(options, attrcheck)
-    file = File.read(options[:create_json])
+  def config # rubocop:disable Metrics/AbcSize
+    attrcheck = { 'Instance'    => @options[:inst],
+                  'create_json' => @options[:create_json] }
+    @validate.attrvalidate(@options, attrcheck)
+    file = File.read(@options[:create_json])
     data_hash = JSON.parse(file)
-    result = BackUpManager.new(options[:id_domain], options[:user_name], options[:passwd])
-    result = result.config(data_hash, options[:inst])
-    if result.code == '401' || result.code == '400' || result.code == '404'
-      puts 'error, JSON was not returned  the http response code was' + result.code
-    else
-      JSON.pretty_generate(JSON.parse(result.body))
-    end # end of if
+    result = BackUpManager.new(@options[:id_domain], @options[:user_name], @options[:passwd])
+    result = result.config(data_hash, @options[:inst])
+    @util.response_handler(result)
+    JSON.pretty_generate(JSON.parse(result.body))
   end # end of method
 
-  def initiate(options) # rubocop:disable Metrics/AbcSize
-    file = File.read(options[:create_json])
+  def initiate # rubocop:disable Metrics/AbcSize
+    file = File.read(@options[:create_json])
     bkup_json_hash = JSON.parse(file)
-    result = BackUpManager.new(options[:id_domain], options[:user_name], options[:passwd])
-    result = result.initialize_backup(bkup_json_hash, options[:inst])
-    if result.code == '401' || result.code == '400' || result.code == '404'
-      puts 'error, JSON was not returned  the http response code was' + result.code
-    else
-      JSON.pretty_generate(JSON.parse(result.body))
-    end # end of if
+    result = BackUpManager.new(@options[:id_domain], @options[:user_name], @options[:passwd])
+    result = result.initialize_backup(bkup_json_hash, @options[:inst])
+    @util.response_handler(result)
+    JSON.pretty_generate(JSON.parse(result.body))
   end # end of method
 
-  def delete(options) # rubocop:disable Metrics/AbcSize
-    attrcheck = { 'Instance'  => options[:inst],
-                  'Backup'    => options[:backup_id]  }
-    @validate.attrvalidate(options, attrcheck)
-    result = BackUpManager.new(options[:id_domain], options[:user_name], options[:passwd])
-    result = result.delete(options[:inst], options[:backup_id])
-    if result.code == '401' || result.code == '400' || result.code == '404'
-      puts 'error, JSON was not returned  the http response code was' + result.code
-    else
-      JSON.pretty_generate(JSON.parse(result.body))
-    end # end of if
+  def delete # rubocop:disable Metrics/AbcSize
+    attrcheck = { 'Instance'  => @options[:inst],
+                  'Backup'    => @options[:backup_id]  }
+    @validate.attrvalidate(@options, attrcheck)
+    result = BackUpManager.new(@options[:id_domain], @options[:user_name], @options[:passwd])
+    result = result.delete(@options[:inst], @options[:backup_id])
+    @util.response_handler(result)
+    JSON.pretty_generate(JSON.parse(result.body))
   end # end of method
 end

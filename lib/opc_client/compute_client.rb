@@ -17,9 +17,25 @@ class ComputeClient < OpcClient
   def request_handler(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
     @options = inputparse.compute('compute')
-    attrcheck = { 'Action' => @options[:action] }
+    @util = Utilities.new
+    attrcheck = { 'Action'  => @options[:action],
+                  'Service' => @options[:function] 
+    }
     @validate = Validator.new
     @validate.attrvalidate(@options, attrcheck)
+    case @options[:function].downcase
+    when 'block_storage', 'snap_storage'
+      bstorage = BlockStorageClient.new
+      bstorage.options = @options
+      bstorage.option_parse
+    when 'instance', 'snapshot'
+      option_parse
+    else
+      abort('you did not select a valid Service')
+    end
+  end
+  
+  def option_parse
     case @options[:action].downcase
     when 'list', 'details'
       list
@@ -37,6 +53,9 @@ class ComputeClient < OpcClient
       machineimage_create
     when 'machineimage_list', 'machineimage_details'
       machineimage_list
+    when 'create'
+      abort('create only for snapshot') unless @options[:function].downcase == 'snapshot'
+      create_snap
     else
       abort('You entered an invalid selection for Action, the options are : machineimage_list, machineimage_create,
        list_ip, list, details, delete')
@@ -51,6 +70,7 @@ class ComputeClient < OpcClient
       'Container'       => @options[:container] }
     @validate.attrvalidate(@options, attrcheck)
     instanceconfig = Instance.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:rest_endpoint])
+    instanceconfig.function = '/snapshot' if @options[:function].downcase == 'snapshot'
     instanceconfig = instanceconfig.list(@options[:container], @options[:action])
     return JSON.pretty_generate(JSON.parse(instanceconfig.body))
   end # end of method
@@ -63,6 +83,7 @@ class ComputeClient < OpcClient
     @validate.attrvalidate(@options, attrcheck)
     instanceconfig = ImageList.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:rest_endpoint])
     instanceconfig = instanceconfig.list(@options[:container])
+    @util.response_handler(instanceconfig)
     return JSON.pretty_generate(JSON.parse(instanceconfig.body))
   end # end of method
 
@@ -76,6 +97,7 @@ class ComputeClient < OpcClient
     create_data = JSON.parse(file)
     instanceconfig = ImageList.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:rest_endpoint])
     instanceconfig = instanceconfig.create(create_data)
+    @util.response_handler(instanceconfig)
     return JSON.pretty_generate(JSON.parse(instanceconfig.body))
   end # end of method
 
@@ -88,6 +110,7 @@ class ComputeClient < OpcClient
     instanceconfig = MachineImage.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:rest_endpoint])
     instanceconfig = instanceconfig.list(@options[:container], 'list') if @options[:action] == 'machineimage_list'
     instanceconfig = instanceconfig.list(@options[:container], 'details') if @options[:action] == 'machineimage_details'
+    @util.response_handler(instanceconfig)
     return JSON.pretty_generate(JSON.parse(instanceconfig.body))
   end # end of method
 
@@ -101,6 +124,7 @@ class ComputeClient < OpcClient
     create_data = JSON.parse(file)
     instanceconfig = MachineImage.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:rest_endpoint])
     instanceconfig = instanceconfig.create(create_data)
+    @util.response_handler(instanceconfig)
     return JSON.pretty_generate(JSON.parse(instanceconfig.body))
   end # end of method
 
@@ -112,6 +136,7 @@ class ComputeClient < OpcClient
     @validate.attrvalidate(@options, attrcheck)
     instance = Instance.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:rest_endpoint])
     instancedelete = instance.delete(@options[:container])
+    @util.response_handler(instancedelete)
     puts 'deleted' if instancedelete.code == '204'
   end # end of method
 
@@ -123,6 +148,7 @@ class ComputeClient < OpcClient
     @validate.attrvalidate(@options, attrcheck)
     instanceconfig = Shape.new(@options[:id_domain], @options[:user_name], @options[:passwd])
     instanceconfig = instanceconfig.list(@options[:rest_endpoint], @options[:container])
+    @util.response_handler(instanceconfig)
     return JSON.pretty_generate(JSON.parse(instanceconfig.body))
   end # end of method
 
@@ -134,6 +160,22 @@ class ComputeClient < OpcClient
     @validate.attrvalidate(@options, attrcheck)
     instanceconfig = Instance.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:rest_endpoint])
     instanceconfig = instanceconfig.list_ip(@options[:container])
+    @util.response_handler(instanceconfig)
     return 'the internal IP address is ' + instanceconfig[0] + ' and the external IP address is ' + instanceconfig[1]
+  end # end of method
+  
+  def create_snap # rubocop:disable Metrics/AbcSize
+    attrcheck = {
+      'REST end point'  => @options[:rest_endpoint],
+      'Container'       => @options[:container]
+    }
+    @validate.attrvalidate(@options, attrcheck)
+    puts 'in snap'
+    instance = Instance.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:rest_endpoint])
+    instance.function = '/snapshot/'
+    instance.machine_image = @options[:inst] if @options[:inst]
+    instancesnap = instance.create_snap(@options[:container])
+    @util.response_handler(instancesnap)
+    return JSON.pretty_generate(JSON.parse(instancesnap.body))
   end # end of method
 end # end of class

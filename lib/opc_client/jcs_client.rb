@@ -1,4 +1,4 @@
-# Author:: Daryn McCool (<mdaryn@hotmail.com>)
+ # Author:: Daryn McCool (<mdaryn@hotmail.com>)
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,10 +19,16 @@ class JcsClient < OpcClient
     @options = inputparse.manage
     attrcheck = { 'Action' => @options[:action] }
     @validate = Validator.new
+    @util = Utilities.new
     @validate.attrvalidate(@options, attrcheck)
     @url = 'https://jaas.oraclecloud.com/paas/service/jcs/api/v1.1/instances/' if @options[:function] == 'jcs' || @options[:function].nil?
     @url = 'https://jaas.oraclecloud.com/paas/service/soa/api/v1.1/instances/' if @options[:function] == 'soa'
-    jaas_manage_client
+    jaas_manage_client unless @options[:function] == 'backup'
+    if @options[:function] == 'backup'
+      backup = BackUpClient.new
+      backup.options= @options
+      backup.option_parse
+    end
   end
 
   attr_writer :url
@@ -38,11 +44,10 @@ class JcsClient < OpcClient
     case @options[:action].downcase
     when  'stop', 'start'
       result = instmanage.mngstate(@options[:inst], @options[:action])
+      @util.response_handler(result)
       puts result['location']
-      abort('Error' + result.code + '  ' + result.body) unless result.code == '202'
       opccreate = InstCreate.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:function])
-      util = Utilities.new
-      util.create_result(@options, result, opccreate)
+      @util.create_result(@options, result, opccreate)
     when 'scaleup'
       if @options[:mang] == 'false'
         attrcheck = { 'create_json' => @options[:create_json] }
@@ -56,32 +61,32 @@ class JcsClient < OpcClient
       }
       @validate.attrvalidate(@options, attrcheck)
       result = instmanage.scale_up(@options[:inst], @options[:cluster_id])
-      puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '202'
-      abort('Error' + result.code + '  ' + result.body) unless result.code == '202'
+      @util.response_handler(result)
+      puts JSON.pretty_generate(JSON.parse(result.body)) 
     when 'scalein'
       result = instmanage.scale_in(@options[:inst], @options[:serverid])
+      @util.response_handler(result)
       puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '202'
-      puts result.body unless result.code == '202'
     when 'avail_patches'
       result = instmanage.available_patches(@options[:inst])
-      puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '200'
-      puts 'error' + result.code unless result.code == '200'
+      @util.response_handler(result)
+      return JSON.pretty_generate(JSON.parse(result.body)) if result.code == '200'
     when 'applied_patches'
       result = instmanage.applied_patches(@options[:inst])
-      puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '200'
-      puts 'error' + result.code unless result.code == '200'
+      @util.response_handler(result)
+      return JSON.pretty_generate(JSON.parse(result.body)) if result.code == '200'
     when 'patch_precheck'
       result = instmanage.patch_precheck(@options[:inst], @options[:patch_id])
-      puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '200'
-      puts 'error' + result.code unless result.code == '200'
+      @util.response_handler(result)
+      return JSON.pretty_generate(JSON.parse(result.body)) if result.code == '200'
     when 'patch'
       result = instmanage.patch(@options[:inst], @options[:patch_id])
-      puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '200'
-      puts result.body unless result.code == '200'
+      @util.response_handler(result)
+      return JSON.pretty_generate(JSON.parse(result.body)) if result.code == '200'
     when 'patch_rollback'
       result = instmanage.patch_rollback(@options[:inst], @options[:patch_id])
+      @util.response_handler(result)
       puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '200'
-      puts 'error' + result.code unless result.code == '200'
     else
       puts 'Invalid selection for action Option ' + @options[:action]
     end # end of case

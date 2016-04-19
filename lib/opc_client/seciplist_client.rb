@@ -14,42 +14,23 @@
 # limitations under the License
 #
 class SecIPListClient < OpcClient
-  def list(args) # rubocop:disable Metrics/AbcSize
-    if caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
-      # if the method is called directly from command line
-      inputparse =  InputParse.new(args)
-      options = inputparse.compute('seciplist')
-      attrcheck = {
-        'Action'    => options[:action],
-        'Instance'  => options[:rest_endpoint],
-        'Container' => options[:container] }
-      @validate = Validator.new
-      @validate.attrvalidate(options, attrcheck)
-    end # end of if
-    options = args unless caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
-    # allows method to be called by other methods
+  
+  def list(options) # rubocop:disable Metrics/AbcSize
+    @util = Utilities.new
     options[:action].downcase
     if options[:action] == 'list' || options[:action] == 'details'
       networkconfig = SecIPList.new(options[:id_domain], options[:user_name], options[:passwd])
-      networkconfig = networkconfig.discover(options[:rest_endpoint], options[:container], options[:action])
+      networkconfig = networkconfig.discover(options[:rest_endpoint], options[:container], options[:action].downcase)
+      @util.response_handler(networkconfig)
       puts JSON.pretty_generate(JSON.parse(networkconfig.body))
     else
       puts 'invalid entry for action, please use details or list'
     end # end of if
   end # end of method
 
-  def update(args) # rubocop:disable Metrics/AbcSize
-    if caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
-      # if the method is called directly from command line the reason for the or is ruby 1.8 support
-      inputparse =  InputParse.new(args)
-      options = inputparse.compute('seciplist')
-      attrcheck = {
-        'Instance'  => options[:rest_endpoint],
-        'Container' => options[:container] }
-      @validate = Validator.new
-      @validate.attrvalidate(options, attrcheck)
-      networkconfig = SecIPList.new(options[:id_domain], options[:user_name], options[:passwd])
-    end
+  def update(options) # rubocop:disable Metrics/AbcSize
+    @util = Utilities.new
+    networkconfig = SecIPList.new(options[:id_domain], options[:user_name], options[:passwd])
     options = args unless caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
     case options[:action]
     when 'update'
@@ -67,17 +48,20 @@ class SecIPListClient < OpcClient
         update[k] = v
       end
       networkupdate = networkconfig.update(options[:rest_endpoint], options[:container], options[:action], update)
+      @util.response_handler(networkupdate)
       JSON.pretty_generate(JSON.parse(networkupdate.body))
     when 'create'
       file = File.read(options[:create_json])
       update = JSON.parse(file)
       networkupdate = networkconfig.update(options[:rest_endpoint], options[:container], options[:action], update)
+      @util.response_handler(networkupdate)
       JSON.pretty_generate(JSON.parse(networkupdate.body))
     when 'delete'
       networkupdate = networkconfig.update(options[:rest_endpoint], options[:container], options[:action])
+      @util.response_handler(networkupdate)
       JSON.pretty_generate(JSON.parse(networkupdate.body))
     else
-      puts 'invalid entry for action'
+      abort('invalid entry for action')
     end # end of case
   end # end of method
 end

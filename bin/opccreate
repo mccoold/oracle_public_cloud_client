@@ -1,5 +1,5 @@
 #! /usr/bin/ruby
-
 require 'opc_client'
-build = PaasClient.new
-puts build.create(ARGV)
+paas = PaasClient.new
+paas.action = 'create'
+puts paas.request_handler(ARGV)

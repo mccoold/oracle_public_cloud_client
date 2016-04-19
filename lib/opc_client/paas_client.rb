@@ -15,43 +15,72 @@
 #
 class PaasClient < OpcClient
   
-  def create(args) # rubocop:disable Metrics/AbcSize
+  def request_handler(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
-    options = inputparse.create
+    @options = inputparse.create if @function == 'create'
+    @options = inputparse.delete if @function == 'delete'
+    attrcheck = { 'Action'  => @options[:function] }
+    # @validate = Validator.new
+    @validate.attrvalidate(@options, attrcheck)
+    case @action
+    when create
+      case @options[:function]
+      when 'dbcs', 'soa', 'jcs'
+        create
+      when 'acc'
+        create_acc
+      end
+    when 'delete'
+      case @options[:function]
+      when 'dbcs', 'soa', 'jcs'
+        delete
+      when 'acc'
+      end
+    end
+  end
+    
+  attr_writer :action
+    
+  def create # rubocop:disable Metrics/AbcSize
     attrcheck = {
-      'create_json'   => options[:create_json],
-      'Action'        => options[:action] }
-    @validate = Validator.new
-    @validate.attrvalidate(options, attrcheck)
-    file = File.read(options[:create_json])
+      'create_json'   => @options[:create_json] }
+    @validate.attrvalidate(@options, attrcheck)
+    file = File.read(@options[:create_json])
     create_data = JSON.parse(file)
-    opccreate = InstCreate.new(options[:id_domain], options[:user_name], options[:passwd], options[:action])
-    opccreate.url = options[:rest_endpoint] if options[:rest_endpoint]
+    opccreate = InstCreate.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:function])
+    opccreate.url = @options[:rest_endpoint] if @options[:rest_endpoint]
     createcall = opccreate.create(create_data)
     if createcall.code == '400' || createcall.code == '404' || createcall.code == '401'
       abort('Error with the REST Call http code ' + createcall.code) unless createcall.body
       abort('Error with the REST Call http code ' + createcall.code + createcall.body) if createcall.body
     else
       util = Utilities.new
-      util.create_result(options, createcall, opccreate)
+      util.create_result(@options, createcall, opccreate)
     end # end of main if
-    # end # end of validator if
   end  # end create method
 
-  def delete(args) # rubocop:disable Metrics/AbcSize
-    inputparse =  InputParse.new(args)
-    options = inputparse.delete
-    attrcheck = { 'Instance' => options[:inst],
-                  'Action' => options[:action] }
-    @validate = Validator.new
-    @validate.attrvalidate(options, attrcheck)
-    deleteconfig = File.read(options[:config]) if options[:action] == 'jcs'
-    data_hash = JSON.parse(deleteconfig) if options[:action] == 'jcs'
-    deleteinst = InstDelete.new(options[:id_domain], options[:user_name], options[:passwd], options[:action])
-    deleteinst.url = options[:rest_endpoint] if options[:rest_endpoint]
-    result = deleteinst.delete(data_hash, options[:inst]) if options[:action] == 'jcs'
-    result = deleteinst.delete(nil, options[:inst]) if options[:action] == 'dbcs'
+  def delete # rubocop:disable Metrics/AbcSize
+    attrcheck = { 'Instance' => @options[:inst] }
+    @validate.attrvalidate(@options, attrcheck)
+    deleteconfig = File.read(@options[:config]) if @options[:function] == 'jcs'
+    data_hash = JSON.parse(deleteconfig) if @options[:function] == 'jcs'
+    deleteinst = InstDelete.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:function])
+    deleteinst.url = @options[:rest_endpoint] if @options[:rest_endpoint]
+    result = deleteinst.delete(data_hash, @options[:inst]) if @options[:function] == 'jcs'
+    result = deleteinst.delete(nil, @options[:inst]) if @options[:function] == 'dbcs'
     puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '202'
     puts result.body + result.code unless result.code == '202'
   end # end of method
+  
+  def acc_create # rubocop:disable Metrics/AbcSize
+    attrcheck = {
+      'application_file'   => @options[:application] }
+    @validate.attrvalidate(@options, attrcheck)
+    contain = Container.new(@options[:id_domain], @options[:user_name], @options[:passwd])
+    file = File.read(@options[:deployment]) if @options[:deployment]
+    create_data = JSON.parse(file)
+    #opccreate = InstCreate.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:function])
+    contain.applicationfile = @options[:application] if @options[:application]
+    createcall = opccreate.create(create_data)
+  end  # end acc create method
 end # end of class

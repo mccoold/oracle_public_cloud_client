@@ -17,6 +17,7 @@ class InputParse < OpcClient
   #
   def initialize(args)
     @args = args
+    @util = Utilities.new
   end
 
   def create # rubocop:disable Metrics/AbcSize
@@ -27,16 +28,18 @@ class InputParse < OpcClient
       opts.on('-u', '--user_name NAME', 'User name for account') { |v| options[:user_name] = v }
       opts.on('-R', '--rest_endpoint REST_ENDPOINT', 'Rest end point') { |v| options[:rest_endpoint] = v }
       opts.on('-p', '--passwd PASS', 'Password for account') { |v| options[:passwd] = v }
-      opts.on('-A', '--action ACTION', 'action options, stop, start, restart') { |v| options[:action] = v }
+      opts.on('-d', '--deployfile DEPLOY', 'path to deployment file') { |v| options[:deploy] = v }
       opts.on('-I', '--inst INST', 'Instance name') { |v| options[:inst] = v }
-      opts.on('-S', '--service SERVICE', 'Service to manage') { |v| options[:function] = v }
+      opts.on('-S', '--service SERVICE', 'Service to manage e.g. soa, jcs, dbcs, acc') { |v| options[:function] = v }
       opts.on('-j', '--create_json JSON', 'json file to describe server') { |v| options[:create_json] = v }
+      opts.on('-a', '--application_file APP', 'json file to describe server') { |v| options[:application] = v }
       opts.on('-t', '--track', 'track status of build') { |track| options[:track] = track  }
       opts.on('-h', '--help', 'Display this screen') do
         puts opts
         exit
       end
     end.parse!
+    @util.config_file_reader(options)
     options
   end # end of method
 
@@ -53,11 +56,13 @@ class InputParse < OpcClient
       opts.on('-I', '--inst INST', 'Instance name') { |v| options[:inst] = v }
       options[:mang] = 'false'
       opts.on('-m', '--managed', 'flag for managed instances') { |v| options[:mang] = 'true' }
+      opts.on('-S', '--service SERVICE', 'Service to manage e.g. soa, jcs, dbcs, acc') { |v| options[:function] = v }
       opts.on('-h', '--help', 'Display this screen') do
         puts opts
         exit
       end
     end.parse!
+    @util.config_file_reader(options)
     options
   end # end of method
 
@@ -69,7 +74,8 @@ class InputParse < OpcClient
       opts.on('-u', '--user_name NAME', 'User name for account') { |v| options[:user_name] = v }
       opts.on('-p', '--passwd PASS', 'Password for account') { |v| options[:passwd] = v }
       opts.on('-R', '--rest_endpoint REST_ENDPOINT', 'Rest end point') { |v| options[:rest_endpoint] = v }
-      opts.on('-A', '--action ACTION', 'action options, jcs, dbcs, soa') { |v| options[:action] = v }
+      # opts.on('-A', '--action ACTION', 'action options, jcs, dbcs, soa') { |v| options[:action] = v }
+      opts.on('-S', '--service SERVICE', 'Service to manage e.g. soa, jcs, dbcs, acc') { |v| options[:function] = v }
       opts.on('-I', '--inst INST', 'Instance name to be deleted') { |v| options[:inst] = v }
       opts.on('-c', '--config CONFIG', 'delete config JSON, for jsc only') { |v| options[:config] = v }
       opts.on('-D', '--dbuser DBUSER', 'DB username, for dbcs only') { |v| options[:dbuser] = v }
@@ -79,6 +85,7 @@ class InputParse < OpcClient
         exit
       end # end help
     end.parse!
+    @util.config_file_reader(options)
     options
   end  # end of method
 
@@ -102,6 +109,7 @@ class InputParse < OpcClient
         exit
       end # end help
     end.parse!
+    @util.config_file_reader(options)
     options
   end  # end of method
 
@@ -130,6 +138,7 @@ class InputParse < OpcClient
         exit
       end
     end.parse!
+    @util.config_file_reader(options)
     options
   end # end of method
 
@@ -142,10 +151,10 @@ class InputParse < OpcClient
       opts.on('-p', '--passwd PASS', 'Password for account') { |v| options[:passwd] = v }
       opts.on('-R', '--rest_endpoint REST_ENDPOINT', 'Rest end point for compute') { |v| options[:rest_endpoint] = v }
       opts.on('-C', '--container CONTAINER', 'Management Container Name for object') { |v| options[:container] = v }
-      opts.on('-F', '--function FUNCTION', 'Management Container Name for object') { |v| options[:function] = v } if caller == 'networklist'
+      opts.on('-S', '--function FUNCTION', 'Management Container Name for object') { |v| options[:function] = v } 
       opts.on('-A', '--action ACTION', 'action for the function, list or detail') { |v| options[:action] = v }
       opts.on('-t', '--track', 'track status of build') { |track| options[:track] = track  }
-      opts.on('-I', '--inst INST', 'Instance name') { |v| options[:inst] = v } if caller == 'orch' || caller == 'compute'
+      opts.on('-I', '--inst INST', 'Instance name, or Image name for snapshot create') { |v| options[:inst] = v } if caller == 'orch' || caller == 'compute'
       opts.on('-j', '--create_json JSON', 'json file to describe server') { |v| options[:create_json] = v }
       opts.on('--update_list x,y,z', Array, 'list of what fields to update field=value,field=value') do |list|
         options[:list] = list
@@ -155,6 +164,7 @@ class InputParse < OpcClient
         exit
       end # end help
     end.parse!
+    @util.config_file_reader(options)
     options
   end  # end of method
 end   # end of class

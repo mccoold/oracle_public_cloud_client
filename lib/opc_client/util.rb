@@ -30,7 +30,7 @@ class Utilities < OpcClient
         status_message =  status_object.body
         status_message_status = JSON.parse(status_message) if status_object.code == '202' || status_object.code == '200'
         if status_object.code == '500'
-          breakkout++
+          breakkout+=
           abort('Rest calls failing 5 times ' + status_object.code) if breakout == 5
         end # end of if
       end # end of while
@@ -59,4 +59,36 @@ class Utilities < OpcClient
                             options[:id_domain], options[:user_name], options[:passwd]) if options[:action] == 'decrypt'
     end # end of validator
   end # end of method
+  
+  def config_file
+    config_file_handler = OPC.new
+    config_files = config_file_handler.cfgfile
+  end
+  
+  def config_file_reader(options)
+    file_values = config_file
+    if options[:id_domain].nil?
+      options[:id_domain] = file_values['id_domain'] unless file_values['id_domain'].nil?
+    end
+    if options[:user_name].nil?
+      options[:user_name] = file_values['user_name'] unless file_values['user_name'].nil?
+    end
+    if options[:rest_endpoint].nil?
+      options[:rest_endpoint] = file_values['rest_endpoint'] unless file_values['rest_endpoint'].nil?
+    end
+    return options
+  end
+  
+  def response_handler(response)
+    if response.code == '400' || response.code == '404'  || response.code == '409' || 
+       response.code == '401' || response.code == '500' || response.code == '403'
+      if response.body.nil? || response.body.empty?
+        abort('error, the error response code is ' + response.code)
+      else
+        abort('Error!! the error response code is ' + response.code + ' error message is ' + response.body)
+      end
+    else
+      return response
+    end  
+  end
 end # end of class

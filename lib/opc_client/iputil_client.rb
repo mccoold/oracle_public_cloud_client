@@ -17,6 +17,7 @@ class IPUtilClient < OpcClient
   def request_handler(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
     @options = inputparse.compute('iputil')
+    @util = Utilities.new
     attrcheck = { 'Action' => @options[:action],
                   'RestEndPoint' => @options[:rest_endpoint],
                   'Function' => @options[:function]
@@ -46,7 +47,8 @@ class IPUtilClient < OpcClient
     attrcheck = { 'Container' => @options[:container] }
     @validate.attrvalidate(@options, attrcheck)
     networkconfig = @iputil.list(@options[:container], @options[:action], @function)
-    puts JSON.pretty_generate(JSON.parse(networkconfig.body))
+    @util.response_handler(networkconfig)
+    return JSON.pretty_generate(JSON.parse(networkconfig.body))
   end # end of method
 
   def update # rubocop:disable Metrics/AbcSize
@@ -67,6 +69,7 @@ class IPUtilClient < OpcClient
     end
     networkupdate.create_json = update
     networkupdate = @iputil.update(@options[:action], @function)
+    @util.response_handler(networkupdate)
     JSON.pretty_generate(JSON.parse(networkupdate.body))
   end # end of method
 
@@ -75,12 +78,14 @@ class IPUtilClient < OpcClient
     update = JSON.parse(file)
     networkupdate.create_json = update
     networkupdate = @iputil.update(@options[:action], @function)
+    @util.response_handler(networkupdate)
     JSON.pretty_generate(JSON.parse(networkupdate.body))
   end # end of method
 
   def delete
     networkupdate.ipcontainer_name = @options[:container]
     networkupdate = @iputil.update(@options[:action], @function)
+    @util.response_handler(networkupdate)
     JSON.pretty_generate(JSON.parse(networkupdate.body))
   end # end of method
 end

@@ -27,7 +27,7 @@ class OpcClient
   require 'opc_client/object_storage_client'
   require 'optparse'
   require 'opc_client/datagrid_client'
-  require 'opc_client/networklist'
+  require 'opc_client/network_client'
   require 'opc_client/dbcs_client'
   require 'opc_client/orch_client'
   require 'opc_client/backupmgr_client'
@@ -38,5 +38,5 @@ class OpcClient
   require 'opc_client/secrule_client'
   require 'opc_client/secapp_client'
   require 'opc_client/block_storage_client'
- end
+end
  

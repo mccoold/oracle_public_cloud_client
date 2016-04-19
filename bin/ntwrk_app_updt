@@ -1,4 +1,0 @@
-#! /usr/bin/ruby
-require 'opc_client'
-network = SecAppClient.new
-puts network.secapp_modify(ARGV)

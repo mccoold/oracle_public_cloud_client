@@ -1,4 +1,0 @@
-#! /usr/bin/ruby
-require 'opc_client'
-jcs = BackUpClient.new
-puts jcs.request_handler(ARGV)

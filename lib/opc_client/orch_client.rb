@@ -20,6 +20,7 @@ class OrchClient < OpcClient
     attrcheck = { 'Action'        => @options[:action],
                   'REST endpoint' => @options[:rest_endpoint] }
     @validate = Validator.new
+    @util = Utilities.new
     @validate.attrvalidate(@options, attrcheck)
     @orch = Orchestration.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:rest_endpoint])
     case @options[:action]
@@ -48,7 +49,7 @@ class OrchClient < OpcClient
     @orch.create_json = data_hash unless @options[:action].downcase == 'delete'
     @orch.container = @options[:container] if @options[:action].downcase == 'delete'
     createcall = @orch.update(@options[:action])
-    abort('error' + createcall.body) if createcall.code == '400' || createcall.code == '404'
+    @util.response_handler(createcall)
     return @options[:container] + ' deleted' if createcall.code == '204' && @options[:action].downcase == 'delete'
     return 'created ' + data_hash['name'] + JSON.pretty_generate(JSON.parse(createcall.body)) if createcall.code == '201' &&
                                                                                                  @options[:action].downcase == 'create'
@@ -58,25 +59,25 @@ class OrchClient < OpcClient
 
   def list # rubocop:disable Metrics/AbcSize
     result = @orch.list(@options[:container], @options[:action])
-    if result.code == '401' || result.code == '400' || result.code == '404'
-      puts 'error, JSON was not returned  the http response code was' + result.code
-    else
-      JSON.pretty_generate(JSON.parse(result.body))
-    end # end of if
+    @util.response_handler(result)
+    JSON.pretty_generate(JSON.parse(result.body))
   end # end of method
 
+  attr_writer :options, :orch
+  
   def manage # rubocop:disable Metrics/AbcSize
     orch_event = @orch.manage(@options[:action], @options[:container])
-    if orch_event.code == '401' || orch_event.code == '400' || orch_event.code == '404' || orch_event.code == '403'
-      abort('error, JSON was not returned  the http response code was ' + orch_event.code)
-    elsif @options[:track]
+    @util.response_handler(orch_event)
+    if @options[:track]
       statusresponse = JSON.parse(orch_event.body)
-      puts statusresponse['status']
+      # puts statusresponse['status']
       if @options[:action] == 'start'
         until statusresponse['status'] == 'ready'  do
-          sleep 25
+          sleep 35
+          puts '.'
           status_call = @orch.list(@options[:container], 'details')
           statusresponse = JSON.parse(status_call.body)
+          abort('error, in orchestration it will not start') if statusresponse['status'] == 'error'
         end
       end
       if @options[:action] == 'stop'

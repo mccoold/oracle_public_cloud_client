@@ -19,6 +19,7 @@ class ObjectStorageClient < OpcClient
     @options = inputparse.storage_create
     attrcheck = { 'Action' => @options[:action] }
     @validate = Validator.new
+    @util = Utilities.new
     @validate.attrvalidate(@options, attrcheck)
     case @options[:action].downcase
     when 'create'
@@ -39,10 +40,9 @@ class ObjectStorageClient < OpcClient
     newcontainer = ObjectStorage.new(@options[:id_domain], @options[:user_name], @options[:passwd])
     newcontainer = newcontainer.create(@options[:container])
     if newcontainer.code == '201'
-      puts newcontainer.code
       puts "Container #{@options[:container]} created"
     else
-      puts newcontainer.body
+      @util.response_handler(newcontainer)
     end # end of if
   end # end of method
 
@@ -51,23 +51,18 @@ class ObjectStorageClient < OpcClient
       containerview = ObjectStorage.new(@options[:id_domain], @options[:user_name], @options[:passwd])
       containerview = containerview.contents(@options[:container])
       if containerview.code == '201' || containerview.code == '200'
-        puts containerview.code
         containerview.body
       elsif containerview.code == '204'
         print 'the container is empty'
       else
-        abort(containerview.body)
+        @util.response_handler(containerview)
       end # end of inside if
     else
       newcontainer = ObjectStorage.new(@options[:id_domain], @options[:user_name], @options[:passwd])
       newcontainer = newcontainer.list
-      if newcontainer.code == '200'
-        puts newcontainer.code
-        newcontainer.body
-      else
-        abort(newcontainer.body) unless newcontainer.code == '204'
-        'there are no containers' if newcontainer.code == '204'
-      end # end of inside if
+      @util.response_handler(newcontainer)
+      newcontainer.body if newcontainer.code == '200'
+      puts 'there are no containers' if newcontainer.code == '204'
     end # end of outside if
   end # end of method
 
@@ -88,7 +83,7 @@ class ObjectStorageClient < OpcClient
     if containerview.code == '204'
       puts "Container #{@options[:container]} deleted"
     else
-      puts containerview.body
+      @util.response_handler(containerview)
     end # end of if
   end # end of method
 

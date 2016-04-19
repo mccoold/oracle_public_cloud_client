@@ -1,4 +1,0 @@
-#! /usr/bin/ruby
-require 'opc_client'
-network = NetworkList.new
-puts network.network_list(ARGV)

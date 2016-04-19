@@ -1,0 +1,4 @@
+#! /usr/bin/ruby
+require 'opc_client'
+network = NetworkClient.new
+puts network.request_handler(ARGV)

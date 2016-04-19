@@ -14,39 +14,21 @@
 # limitations under the License
 #
 class SecRuleClient < OpcClient
-  def list(args)  # rubocop:disable Metrics/AbcSize
-    if caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
-      inputparse =  InputParse.new(args)
-      options = inputparse.compute('secrule')
-      attrcheck = {
-        'Action'    => options[:action],
-        'Instance'  => options[:rest_endpoint],
-        'Container' => options[:container] }
-      @validate = Validator.new
-      @validate.attrvalidate(options, attrcheck)
-    end
-    options = args unless caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
+  def list(options)  # rubocop:disable Metrics/AbcSize
+    @util = Utilities.new
     options[:action].downcase
     if options[:action] == 'list' || options[:action] == 'details'
       networkconfig = SecRule.new(options[:id_domain], options[:user_name], options[:passwd])
       networkconfig = networkconfig.discover(options[:rest_endpoint], options[:container], options[:action])
+      @util.response_handler(networkconfig)
       puts JSON.pretty_generate(JSON.parse(networkconfig.body))
     else
-      puts 'Invalid entry for action, please use details or list'
+      abort('invalid entry for action please use details or list')
     end # end of if
   end # end of method
 
-  def update(args)  # rubocop:disable Metrics/AbcSize
-    if caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
-      inputparse =  InputParse.new(args)
-      options = inputparse.compute('secrule')
-      attrcheck = {
-        'Instance'  => options[:rest_endpoint],
-        'Container' => options[:container] }
-      @validate = Validator.new
-      @validate.attrvalidate(options, attrcheck)
-    end
-    options = args unless caller[0][/`([^']*)'/, 1] == '<top (required)>' || caller[0][/`([^']*)'/, 1].nil?
+  def update(options)  # rubocop:disable Metrics/AbcSize
+    @util = Utilities.new
     networkconfig = SecRule.new(options[:id_domain], options[:user_name], options[:passwd])
     case options[:action]
     when 'update'
@@ -64,17 +46,20 @@ class SecRuleClient < OpcClient
         update[k] = v
       end
       networkupdate = networkconfig.update(options[:rest_endpoint], options[:container], options[:action], update)
+      @util.response_handler(networkupdate)
       JSON.pretty_generate(JSON.parse(networkupdate.body))
     when 'create'
       file = File.read(options[:create_json])
       update = JSON.parse(file)
       networkupdate = networkconfig.update(options[:rest_endpoint], options[:container], options[:action], update)
+      @util.response_handler(networkupdate)
       JSON.pretty_generate(JSON.parse(networkupdate.body))
     when 'delete'
       networkupdate = networkconfig.update(options[:rest_endpoint], options[:container], options[:action])
+      @util.response_handler(networkupdate)
       JSON.pretty_generate(JSON.parse(networkupdate.body))
     else
-      puts 'invalid entry for action'
+      abort('invalid entry for action')
     end # end of case
   end # end of method
 end

@@ -39,12 +39,8 @@ class DataGridClient < OpcClient
     data_hash = JSON.parse(file)
     dgcreate = DataGrid.new(options[:id_domain], options[:user_name], options[:passwd])
     createcall = dgcreate.create(options[:inst], data_hash)
-    if createcall.code == '400'
-      puts 'error'
-      puts createcall.body
-    else
-      puts createcall.body
-    end
+    abort('error' + createcall.body) if createcall.code == '400' || createcall.code == '401' || createcall.code == '404'   
+    puts createcall.body
   end  # end create method
 
   def list(options) # rubocop:disable Metrics/AbcSize
@@ -52,11 +48,8 @@ class DataGridClient < OpcClient
     @validate.attrvalidate(options, attrcheck)
     result = DataGrid.new(options[:id_domain], options[:user_name], options[:passwd])
     result = result.list
-    if result.code == '401' || result.code == '400' || result.code == '404'
-      puts 'error, JSON was not returned  the http response code was' + result.code
-    else
-      JSON.pretty_generate(JSON.parse(result.body))
-    end # end of if
+    abort('error, JSON was not returned  the http response code was' + result.code) if result.code == '401' || result.code == '400' || result.code == '404'
+    JSON.pretty_generate(JSON.parse(result.body))
   end # end of method
 
   def delete(options) # rubocop:disable Metrics/AbcSize

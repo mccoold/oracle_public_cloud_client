@@ -14,53 +14,63 @@
 # limitations under the License
 #
 class BlockStorageClient < OpcClient
-  def request_handler(args) # rubocop:disable Metrics/AbcSize
-    inputparse =  InputParse.new(args)
-    options = inputparse.compute('blockstorage')
+  def option_parse
+    @util = Utilities.new
     attrcheck = {
-      'Action'         => options[:action],
-      'REST endpoint'  => options[:rest_endpoint],
-      'Container'      => options[:container]
+      'Action'         => @options[:action],
+      'REST endpoint'  => @options[:rest_endpoint]
     }
     @validate = Validator.new
-    @validate.attrvalidate(options, attrcheck)
-    case options[:action].downcase
+    @validate.attrvalidate(@options, attrcheck)
+    case @options[:action].downcase
     when 'create'
-      update(options)
-    when 'list'
-      list(options)
+      update
+    when 'list', 'details'
+      list
     when 'delete'
-      update(options)
+      update
     else
       abort('you entered an invalid selection for Action')
     end # end case
   end # end method
 
-  def list(options)  # rubocop:disable Metrics/AbcSize
-    options[:action].downcase
-    if options[:action] == 'list' || options[:action] == 'details'
-      storageconfig = BlockStorage.new(options[:id_domain], options[:user_name], options[:passwd])
-      storageconfig = storageconfig.list(options[:rest_endpoint], options[:container], options[:action])
-      puts JSON.pretty_generate(JSON.parse(storageconfig.body))
+  attr_writer :options
+
+  def list  # rubocop:disable Metrics/AbcSize
+    attrcheck = {'Container'      => @options[:container] }
+    @validate.attrvalidate(@options, attrcheck)
+    @options[:action].downcase
+    if @options[:action] == 'list' || @options[:action] == 'details'
+      storageconfig = BlockStorage.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:rest_endpoint])
+      storageconfig = storageconfig.list(@options[:container], @options[:action])
+      @util.response_handler(storageconfig)
+      return JSON.pretty_generate(JSON.parse(storageconfig.body))
     else
       puts 'invalid entry for action, please use details or list'
     end # end of if
   end # end of method
 
-  def update(options) # rubocop:disable Metrics/AbcSize
-    storageconfig = BlockStorage.new(options[:id_domain], options[:user_name], options[:passwd])
-    case options[:action].downcase
+  def update # rubocop:disable Metrics/AbcSize
+    storageconfig = BlockStorage.new(@options[:id_domain], @options[:user_name], @options[:passwd],
+                                     @options[:rest_endpoint])
+    case @options[:action].downcase
     when 'create'
-      attrcheck = { 'create_json' => options[:create_json] }
-      @validate.attrvalidate(options, attrcheck)
-      file = File.read(options[:create_json])
+      attrcheck = { 'create_json' => @options[:create_json] }
+      @validate.attrvalidate(@options, attrcheck)
+      file = File.read(@options[:create_json])
       update = JSON.parse(file)
-      storageupdate = storageconfig.update(options[:rest_endpoint], options[:action], update)
+      storageconfig.create_parms = update unless @options[:function] == 'snap_storage'
+      storageconfig.function = @options[:function] if @options[:function] == 'snap_storage'
+      storageupdate = storageconfig.update(@options[:action])
+       @util.response_handler(storageupdate)
       JSON.pretty_generate(JSON.parse(storageupdate.body))
     when 'delete'
-      storageupdate = storageconfig.secrule_update(options[:rest_endpoint], options[:container],
-                                                   options[:action])
-      JSON.pretty_generate(JSON.parse(storageupdate.body))
+      attrcheck = {'Container'      => @options[:container] }
+      @validate.attrvalidate(@options, attrcheck)
+      storageconfig.container = @options[:container]
+      storageupdate = storageconfig.update(@options[:action])
+      @util.response_handler(storageupdate)
+      return 'storage volume ' + @options[:container] + ' has been deleted'  if storageupdate.code == '204'
     else
       abort('invalid entry')
     end # end of case

@@ -17,22 +17,22 @@ class PaasList < OpcClient
   def srvice_list(args)
     inputparse =  InputParse.new(args)
     @options = inputparse.inst_list('list')
-    attrcheck = { 'Action' => @options[:action] }
+    attrcheck = { 'Service' => @options[:function] }
     @validate = Validator.new
     @validate.attrvalidate(@options, attrcheck)
+    @util = Utilities.new
     util_service_list
   end  # end of method list
 
   def util_service_list # rubocop:disable Metrics/AbcSize
-    list_result = SrvList.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:action])
+    list_result = SrvList.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:function])
     list_result.url = @options[:rest_endpoint] if @options[:rest_endpoint]
     if @options[:inst]
       inst_list(list_result)
     else
       result = list_result.service_list
-      print 'error, JSON was not returned  the http response code was ' +
-        result.code if result.code == '401' || result.code == '404'
-      JSON.pretty_generate(JSON.parse(result.body)) unless result.code == '401' || result.code == '404'
+      @util.response_handler(result)
+      JSON.pretty_generate(JSON.parse(result.body))
     end # end of inst if
   end # end of method
 
@@ -44,22 +44,18 @@ class PaasList < OpcClient
       puts 'error in requrest' + result.code unless result.code == '200'
     else # inside mang else
       result = result.inst_list(@options[:inst])
-      case @options[:action].downcase
+      case @options[:function].downcase
       when 'jcs', 'soa'
-        return JSON.pretty_generate(JSON.parse(result.body)) unless result.code == '401' || result.code == '404'
-        abort('error, JSON was not returned  the http response code was ' +
-        result.code) if result.code == '401' || result.code == '404'
+        @util.response_handler(result)
+        return JSON.pretty_generate(JSON.parse(result.body))
       when 'dbcs'
-        unless result.code == '401' || result.code == '404'
-          result_json = JSON.parse(result.body)
-          ssh_host = (result_json['glassfish_url'])
-          ssh_host.delete! 'https://'
-          ssh_host.slice!('4848')
-          puts "#{ssh_host}"
-          puts JSON.pretty_generate(result_json)
-        end # end of unless
-        abort('error, JSON was not returned  the http response code was ' +
-          result.code) if result.code == '401' || result.code == '404'
+        @util.response_handler(result)
+        result_json = JSON.parse(result.body)
+        ssh_host = (result_json['glassfish_url'])
+        ssh_host.delete! 'https://'
+        ssh_host.slice!('4848')
+        puts "#{ssh_host}"
+        puts JSON.pretty_generate(result_json)
       else
         print 'what are you sending? It is not correct'
       end # end of case

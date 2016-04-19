@@ -40,7 +40,7 @@ class DbcsClient < OpcClient
       if result.code == '202'
         JSON.pretty_generate(JSON.parse(result.body))
       else
-        abort('Error ' + result.code + '  ' + result.body)
+        util.response_handler(result)
       end # end of if
     end # end of case
   end  # end of method manage
