@@ -6,28 +6,30 @@
 command line functions proioning and maintaining cloud elements in the Oracle public cloud.  
 The gem handles both the IaaS and PaaS(JaaS, DBaaS) functinality.  This functionality comes as part of 
 the knife plugin gem and can be used alone or with Chef.
-* Version 0.3.0
+* Version 0.4.0
 
 ### Setup and Dependencies ###
-**
-* Summary of set up**:  Install dependencies, install Gem, read usage file
+
+**Install:**  
+gem install oracle_public_cloud_client
+
 
 + **Dependencies:** 
-    *  OPC-0.3.0
+    *  OPC-0.3.2
     * json 1.8.3
     * http
     * rubygems
     * optparse
 
 + **Executables**: 
-      * Executables are command line executables, they will require .bat for windows.  They all take options use -h for list of available options, 
-if a required option is not provided they will return an error asking for the required option.
+      * This is a command line tool all functions will require .bat for windows.  They all take options use -h for list of available options, if a required option is not provided the tool will return an error asking for the required option.
 	  * See COMMANDLINE_USAGE for details on the command line
 
-     
 
-### Class and Method Descriptions ###
-See CLASSES_README file
+**Features**
+*  Proxy Support
+*  Config files for setting up your environment
+ 
 
 ### Repo Owner ###
 

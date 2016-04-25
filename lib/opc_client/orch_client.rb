@@ -63,7 +63,7 @@ class OrchClient < OpcClient
     JSON.pretty_generate(JSON.parse(result.body))
   end # end of method
 
-  attr_writer :options, :orch
+  attr_writer :options, :orch, :util
   
   def manage # rubocop:disable Metrics/AbcSize
     orch_event = @orch.manage(@options[:action], @options[:container])
@@ -74,7 +74,7 @@ class OrchClient < OpcClient
       if @options[:action] == 'start'
         until statusresponse['status'] == 'ready'  do
           sleep 35
-          puts '.'
+          print '.'
           status_call = @orch.list(@options[:container], 'details')
           statusresponse = JSON.parse(status_call.body)
           abort('error, in orchestration it will not start') if statusresponse['status'] == 'error'

@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "oracle_public_cloud_client"
-  s.version = "0.3.2"
+  s.version = "0.4.0"
   s.authors = ["Daryn McCool"]
   s.date = Date.today.to_s
   s.description = 'A command line client for the Oracle Public Cloud for PaaS and IaaS'

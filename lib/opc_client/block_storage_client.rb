@@ -62,7 +62,7 @@ class BlockStorageClient < OpcClient
       storageconfig.create_parms = update unless @options[:function] == 'snap_storage'
       storageconfig.function = @options[:function] if @options[:function] == 'snap_storage'
       storageupdate = storageconfig.update(@options[:action])
-       @util.response_handler(storageupdate)
+      @util.response_handler(storageupdate)
       JSON.pretty_generate(JSON.parse(storageupdate.body))
     when 'delete'
       attrcheck = {'Container'      => @options[:container] }
@@ -71,6 +71,19 @@ class BlockStorageClient < OpcClient
       storageupdate = storageconfig.update(@options[:action])
       @util.response_handler(storageupdate)
       return 'storage volume ' + @options[:container] + ' has been deleted'  if storageupdate.code == '204'
+    when 'update'
+      attrcheck = { 'create_json' => @options[:create_json],
+                    'Container'      => @options[:container] 
+      }
+      @validate.attrvalidate(@options, attrcheck)
+      file = File.read(@options[:create_json])
+      update = JSON.parse(file)
+      abort('this functionality is not for snapshot') if @options[:function] == 'snap_storage'
+      # storageconfig.function = @options[:function] if @options[:function] == 'snap_storage'
+      storageconfig.container = @options[:container]
+      storageupdate = storageconfig.update(@options[:action])
+      @util.response_handler(storageupdate)
+      JSON.pretty_generate(JSON.parse(storageupdate.body))
     else
       abort('invalid entry')
     end # end of case
