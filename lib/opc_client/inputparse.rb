@@ -151,7 +151,7 @@ class InputParse < OpcClient
       opts.on('-p', '--passwd PASS', 'Password for account') { |v| options[:passwd] = v }
       opts.on('-R', '--rest_endpoint REST_ENDPOINT', 'Rest end point for compute') { |v| options[:rest_endpoint] = v }
       opts.on('-C', '--container CONTAINER', 'Management Container Name for object') { |v| options[:container] = v }
-      opts.on('-S', '--function FUNCTION', 'Management Container Name for object') { |v| options[:function] = v } 
+      opts.on('-S', '--Service SERVICE', 'block_storage, snap_storage, instance', 'snapshot') { |v| options[:function] = v } 
       opts.on('-A', '--action ACTION', 'action for the function, list or detail') { |v| options[:action] = v }
       opts.on('-t', '--track', 'track status of build') { |track| options[:track] = track  }
       opts.on('-I', '--inst INST', 'Instance name, or Image name for snapshot create') { |v| options[:inst] = v } if caller == 'orch' || caller == 'compute'

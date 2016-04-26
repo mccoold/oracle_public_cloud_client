@@ -62,7 +62,7 @@ class ComputeClient < OpcClient
     end # end case
   end # end method
 
-  attr_writer :options, :util
+  attr_writer :options, :util, :validate
 
   def list # rubocop:disable Metrics/AbcSize
     attrcheck = {

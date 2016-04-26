@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.add_dependency('OPC', '~> 0.3.2')
   s.add_dependency('json')
   s.executables = ['opclist','opcdelete', 'jcsmanage', 'opccreate', 'objstrg', 'opcnetworkbulkload',
-                   'datagrid', 'dbcsmanage', 'jcsbkup', 'encrypt', 'opccompute', 'opcnetworkclient',
+                   'datagrid', 'dbcsmanage', 'encrypt', 'opccompute', 'opcnetworkclient',
                    'orch_client']
   s.rubygems_version = %q{1.6.2}
   s.summary = 'Oracle_Public_Cloud_Client for PaaS and IaaS'
