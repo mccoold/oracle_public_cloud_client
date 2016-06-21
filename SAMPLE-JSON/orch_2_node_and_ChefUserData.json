@@ -1,0 +1,135 @@
+{
+  "oplans": [{
+    "objects": [{
+      "properties": [
+        "/oracle/public/storage/default"
+      ],
+      "imagelist_entry": 1,
+      "bootable": true,
+      "account": "/Compute-ID_DOMAIN/default",
+      "name": "/Compute-ID_DOMAIN/USER/instance1-storage-vol",
+      "size": "13958643712",
+      "tags": [],
+      "imagelist": "/Compute-ID_DOMAIN/USER/Centos"
+    }],
+    "label": "instance1-storage-vol",
+    "obj_type": "storage/volume"
+  },
+  {
+    "objects": [{
+      "properties": [
+        "/oracle/public/storage/default"
+      ],
+      "imagelist_entry": 1,
+      "bootable": true,
+      "account": "/Compute-ID_DOMAIN/default",
+      "name": "/Compute-ID_DOMAIN/USER/instance2-storage-vol",
+      "size": "13958643712",
+      "tags": [
+
+      ],
+      "imagelist": "/Compute-ID_DOMAIN/USER/Centos"
+    }],
+    "label": "instance2-storage-vol",
+    "obj_type": "storage/volume"
+  },  
+  {
+    "objects": [{
+      "instances": [
+      {
+        "attributes": {
+          "userdata": {
+            "chef": {
+              "run_list": [
+                "recipe[mesos::slave]"
+              ],
+              "environment" : "demo",
+              "tags": ["slave1"],
+              "ssh_user" : "centos"
+            }
+          }
+        },
+        "boot_order": [
+          1
+        ],
+        "shape": "oc3",
+        "sshkeys": [
+          "/Compute-ID_DOMAIN/USER/SSHKEY"
+        ],
+        "networking": {
+          "eth0": {
+            "nat": "ippool:/oracle/public/ippool",
+            "seclists": [
+              "/Compute-ID_DOMAIN/default/default"
+            ]
+          }
+        },
+        "placement_requirements": [
+
+        ],
+        "label": "mesos-slave",
+        "reverse_dns": false,
+        "storage_attachments": [{
+          "index": 1,
+          "volume": "/Compute-ID_DOMAIN/USER/instance1-storage-vol"
+        }],
+        "imagelist": "/Compute-ID_DOMAIN/USER/Centos"
+      },
+      {
+        "attributes": {
+          "userdata": {
+            "chef": {
+              "run_list": [
+                "role[test]"
+              ],
+              "environment" : "demo",
+              "tags" : ["test"],
+              "ssh_user" : "centos"
+            }
+          }
+        },
+        "boot_order": [
+          1
+        ],
+        "shape": "oc3",
+        "sshkeys": [
+          "/Compute-ID_DOMAIN/cloud.admin/SSHKEY"
+        ],
+        "networking": {
+          "eth0": {
+            "nat": "ippool:/oracle/public/ippool",
+            "seclists": [
+              "/Compute-ID_DOMAIN/default/default"
+            ]
+          }
+        },
+        "placement_requirements": [
+
+        ],
+        "label": "mesos",
+        "reverse_dns": false,
+        "storage_attachments": [{
+          "index": 1,
+          "volume": "/Compute-ID_DOMAIN/USER/instance2-storage-vol"
+        }],
+        "imagelist": "/Compute-ID_DOMAIN/USER/Centos"
+      }]
+    }],
+    "label": "mesos_instances",
+    "obj_type": "launchplan"
+  }],
+  "relationships": [{
+    "oplan": "mesos_instances",
+    "type": "depends",
+    "to_oplan": "instance1-storage-vol"
+  },
+  {
+    "oplan": "mesos_instances",
+    "type": "depends",
+    "to_oplan": "instance2-storage-vol"
+  }
+  ],
+  "account": "/Compute-ID_DOMAIN/default",
+  "name": "/Compute-ID_DOMAIN/USER/mesos",
+  "description": "mesos cluster test"
+} 

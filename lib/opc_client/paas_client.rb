@@ -17,13 +17,14 @@ class PaasClient < OpcClient
   
   def request_handler(args) # rubocop:disable Metrics/AbcSize
     inputparse =  InputParse.new(args)
-    @options = inputparse.create if @function == 'create'
-    @options = inputparse.delete if @function == 'delete'
+    @options = inputparse.create if @action == 'create'
+    @options = inputparse.delete if @action == 'delete'
     attrcheck = { 'Action'  => @options[:function] }
-    # @validate = Validator.new
+    @validate = Validator.new
     @validate.attrvalidate(@options, attrcheck)
+    @util = Utilities.new
     case @action
-    when create
+    when 'create'
       case @options[:function]
       when 'dbcs', 'soa', 'jcs'
         create
@@ -39,7 +40,7 @@ class PaasClient < OpcClient
     end
   end
     
-  attr_writer :action
+  attr_writer :action, :validate, :util, :options
     
   def create # rubocop:disable Metrics/AbcSize
     attrcheck = {
@@ -50,13 +51,8 @@ class PaasClient < OpcClient
     opccreate = InstCreate.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:function])
     opccreate.url = @options[:rest_endpoint] if @options[:rest_endpoint]
     createcall = opccreate.create(create_data)
-    if createcall.code == '400' || createcall.code == '404' || createcall.code == '401'
-      abort('Error with the REST Call http code ' + createcall.code) unless createcall.body
-      abort('Error with the REST Call http code ' + createcall.code + createcall.body) if createcall.body
-    else
-      util = Utilities.new
-      util.create_result(@options, createcall, opccreate)
-    end # end of main if
+    @util.response_handler(createcall)
+    @util.create_result(@options, createcall, opccreate)
   end  # end create method
 
   def delete # rubocop:disable Metrics/AbcSize
@@ -68,8 +64,8 @@ class PaasClient < OpcClient
     deleteinst.url = @options[:rest_endpoint] if @options[:rest_endpoint]
     result = deleteinst.delete(data_hash, @options[:inst]) if @options[:function] == 'jcs'
     result = deleteinst.delete(nil, @options[:inst]) if @options[:function] == 'dbcs'
-    puts JSON.pretty_generate(JSON.parse(result.body)) if result.code == '202'
-    puts result.body + result.code unless result.code == '202'
+    @util.response_handler(result)
+    JSON.pretty_generate(JSON.parse(result.body)) if result.code == '202'
   end # end of method
   
   def acc_create # rubocop:disable Metrics/AbcSize
@@ -79,7 +75,6 @@ class PaasClient < OpcClient
     contain = Container.new(@options[:id_domain], @options[:user_name], @options[:passwd])
     file = File.read(@options[:deployment]) if @options[:deployment]
     create_data = JSON.parse(file)
-    #opccreate = InstCreate.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:function])
     contain.applicationfile = @options[:application] if @options[:application]
     createcall = opccreate.create(create_data)
   end  # end acc create method

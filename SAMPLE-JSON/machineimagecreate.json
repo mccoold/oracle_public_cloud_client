@@ -1,0 +1,11 @@
+{
+   "account": "/Compute-ID_DOMAIN/cloud_storage", 
+   "name": "/Compute-ID_DOMAIN/USER/OEL66key", 
+   "no_upload": true, 
+   "file": "/images/IMAGE_NAME.tar.gz" ,
+   "sizes": {
+	  "uploaded": 1043757616,
+	  "total": 1043757616,
+	  "decompressed": 12884901888
+	}
+}

@@ -42,6 +42,7 @@ class BlockStorageClient < OpcClient
     @options[:action].downcase
     if @options[:action] == 'list' || @options[:action] == 'details'
       storageconfig = BlockStorage.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:rest_endpoint])
+      storageconfig.function = @options[:function]
       storageconfig = storageconfig.list(@options[:container], @options[:action])
       @util.response_handler(storageconfig)
       return JSON.pretty_generate(JSON.parse(storageconfig.body))
@@ -59,8 +60,8 @@ class BlockStorageClient < OpcClient
       @validate.attrvalidate(@options, attrcheck)
       file = File.read(@options[:create_json])
       update = JSON.parse(file)
-      storageconfig.create_parms = update unless @options[:function] == 'snap_storage'
-      storageconfig.function = @options[:function] if @options[:function] == 'snap_storage'
+      storageconfig.create_parms = update unless @options[:function] == 'volume_snapshot'
+      storageconfig.function = @options[:function] if @options[:function] == 'volume_snapshot'
       storageupdate = storageconfig.update(@options[:action])
       @util.response_handler(storageupdate)
       JSON.pretty_generate(JSON.parse(storageupdate.body))
@@ -78,7 +79,7 @@ class BlockStorageClient < OpcClient
       @validate.attrvalidate(@options, attrcheck)
       file = File.read(@options[:create_json])
       update = JSON.parse(file)
-      abort('this functionality is not for snapshot') if @options[:function] == 'snap_storage'
+      abort('this functionality is not for snapshot') if @options[:function] == 'volume_snapshot'
       # storageconfig.function = @options[:function] if @options[:function] == 'snap_storage'
       storageconfig.container = @options[:container]
       storageupdate = storageconfig.update(@options[:action])

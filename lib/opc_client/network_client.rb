@@ -19,8 +19,8 @@ class NetworkClient < OpcClient
     @options = inputparse.compute('networkclient') 
     attrcheck = { 'Service'       => @options[:function],
                   'Action'        => @options[:action],
-                  'RestEndPoint'  => @options[:rest_endpoint],
-                  'Container'     => @options[:container]
+                  'RestEndPoint'  => @options[:rest_endpoint]
+                  # 'Container'     => @options[:container] 
     }
     @validate = Validator.new
     @validate.attrvalidate(@options, attrcheck)
@@ -87,6 +87,16 @@ class NetworkClient < OpcClient
         iputilc.delete
       when 'update'
         iputilc.update
+      else
+        abort('you entered an incorrect action')
+      end
+      when 'ssh_key'
+      sshkey = SshkeyClient.new
+      case @options[:action].downcase
+      when 'list', 'details'
+        sshkey.list(@options)
+      when 'create', 'delete', 'update'
+        sshkey.update(@options)
       else
         abort('you entered an incorrect action')
       end

@@ -38,5 +38,6 @@ class OpcClient
   require 'opc_client/secrule_client'
   require 'opc_client/secapp_client'
   require 'opc_client/block_storage_client'
+  require 'opc_client/sshkey_client'
 end
  

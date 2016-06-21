@@ -24,11 +24,11 @@ class ComputeClient < OpcClient
     @validate = Validator.new
     @validate.attrvalidate(@options, attrcheck)
     case @options[:function].downcase
-    when 'block_storage', 'snap_storage'
+    when 'block_storage', 'snap_storage', 'volume_snapshot'
       bstorage = BlockStorageClient.new
       bstorage.options = @options
       bstorage.option_parse
-    when 'instance', 'snapshot'
+    when 'instance', 'inst_snapshot'
       option_parse
     else
       abort('you did not select a valid Service')
@@ -54,7 +54,8 @@ class ComputeClient < OpcClient
     when 'machineimage_list', 'machineimage_details'
       machineimage_list
     when 'create'
-      abort('create only for snapshot') unless @options[:function].downcase == 'snapshot'
+      abort('create only for snapshot') unless @options[:function].downcase == 'inst_snapshot'  || 
+                                               @options[:function].downcase == 'volume_snapshot'
       create_snap
     else
       abort('You entered an invalid selection for Action, the options are : machineimage_list, machineimage_create,
@@ -70,7 +71,8 @@ class ComputeClient < OpcClient
       'Container'       => @options[:container] }
     @validate.attrvalidate(@options, attrcheck)
     instanceconfig = Instance.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:rest_endpoint])
-    instanceconfig.function = '/snapshot' if @options[:function].downcase == 'snapshot'
+    instanceconfig.function = '/snapshot' if @options[:function].downcase == 'inst_snapshot'
+    instanceconfig.function = '/storage/snapshot'  if @options[:function].downcase == 'volume_snapshot'
     instanceconfig = instanceconfig.list(@options[:container], @options[:action])
     return JSON.pretty_generate(JSON.parse(instanceconfig.body))
   end # end of method
@@ -172,7 +174,8 @@ class ComputeClient < OpcClient
     @validate.attrvalidate(@options, attrcheck)
     puts 'in snap'
     instance = Instance.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:rest_endpoint])
-    instance.function = '/snapshot/'
+    instance.function = '/snapshot/' if @options[:function].downcase == 'inst_snapshot'
+    #instance.function = '/storage/snapshot/'  if @options[:function].downcase == 'volume_snapshot'
     instance.machine_image = @options[:inst] if @options[:inst]
     instancesnap = instance.create_snap(@options[:container])
     @util.response_handler(instancesnap)
