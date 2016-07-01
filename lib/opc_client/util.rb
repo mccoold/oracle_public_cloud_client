@@ -34,7 +34,7 @@ class Utilities < OpcClient
           abort('Rest calls failing 5 times ' + status_object.code) if breakout == 5
         end # end of if
       end # end of while
-      result = SrvList.new(options[:id_domain], options[:user_name], options[:passwd], options[:action])
+      result = SrvList.new(options[:id_domain], options[:user_name], options[:passwd], options[:function])
       puts status_message_status['service_name']
       result = result.inst_list(status_message_status['service_name'])
       puts JSON.pretty_generate(JSON.parse(result.body))
@@ -67,16 +67,18 @@ class Utilities < OpcClient
   
   def config_file_reader(options)
     file_values = config_file
-    if options[:id_domain].nil?
-      options[:id_domain] = file_values['id_domain'] unless file_values['id_domain'].nil?
+    if !file_values.nil?
+      if options[:id_domain].nil?
+        options[:id_domain] = file_values['id_domain'] unless file_values['id_domain'].nil?
+      end
+      if options[:user_name].nil?
+        options[:user_name] = file_values['user_name'] unless file_values['user_name'].nil?
+      end
+      if options[:rest_endpoint].nil?
+        options[:rest_endpoint] = file_values['rest_endpoint'] unless file_values['rest_endpoint'].nil?
+      end
     end
-    if options[:user_name].nil?
-      options[:user_name] = file_values['user_name'] unless file_values['user_name'].nil?
-    end
-    if options[:rest_endpoint].nil?
-      options[:rest_endpoint] = file_values['rest_endpoint'] unless file_values['rest_endpoint'].nil?
-    end
-    return options
+      return options
   end
   
   def response_handler(response)

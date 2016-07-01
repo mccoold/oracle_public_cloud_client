@@ -19,7 +19,7 @@ class PaasClient < OpcClient
     inputparse =  InputParse.new(args)
     @options = inputparse.create if @action == 'create'
     @options = inputparse.delete if @action == 'delete'
-    attrcheck = { 'Action'  => @options[:function] }
+    attrcheck = { 'Service'  => @options[:function] }
     @validate = Validator.new
     @validate.attrvalidate(@options, attrcheck)
     @util = Utilities.new

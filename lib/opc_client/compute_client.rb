@@ -137,6 +137,7 @@ class ComputeClient < OpcClient
     }
     @validate.attrvalidate(@options, attrcheck)
     instance = Instance.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:rest_endpoint])
+    instancedelete.function = '/snapshot' if @options[:function].downcase == 'inst_snapshot'
     instancedelete = instance.delete(@options[:container])
     @util.response_handler(instancedelete)
     puts 'deleted' if instancedelete.code == '204'
@@ -172,7 +173,6 @@ class ComputeClient < OpcClient
       'Container'       => @options[:container]
     }
     @validate.attrvalidate(@options, attrcheck)
-    puts 'in snap'
     instance = Instance.new(@options[:id_domain], @options[:user_name], @options[:passwd], @options[:rest_endpoint])
     instance.function = '/snapshot/' if @options[:function].downcase == 'inst_snapshot'
     #instance.function = '/storage/snapshot/'  if @options[:function].downcase == 'volume_snapshot'
