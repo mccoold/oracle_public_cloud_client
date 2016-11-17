@@ -1,0 +1,101 @@
+#! /usr/bin/ruby
+require 'opc_client'
+case ARGV[0]
+when "compute"
+  case ARGV[1]
+  when "instance", "inst_snapshot"
+    compute = ComputeClient.new
+    compute.argsfunction = 'instance'
+    puts compute.request_handler(ARGV)
+  when "imagelist"
+    compute = ComputeClient.new
+    compute.argsfunction = 'imagelist'
+    puts compute.request_handler(ARGV)
+  when "machineimage"
+    compute = ComputeClient.new
+    compute.argsfunction = 'machineimage'
+    puts compute.request_handler(ARGV)
+  else
+    puts 'correct values are machineimage, imagelist, instance, inst_snapshot'
+  end
+when "orchestration"
+  orch = OrchClient.new
+  puts orch.request_handler(ARGV)
+when "paas"
+  case ARGV[1]
+  when "jcs"
+    paas = PaasClient.new
+    paas.argsfunction = 'jcs'
+    puts paas.request_handler(ARGV)
+  when "dbcs"
+    paas = PaasClient.new
+    paas.argsfunction = 'jcs'
+    puts paas.request_handler(ARGV)
+  when "soa"
+    paas = PaasClient.new
+    paas.argsfunction = 'soa'
+    puts paas.request_handler(ARGV)
+  when "datagrid"
+    dg = DataGridClient.new
+    dg.argsfunction = 'dg'
+    puts dg.request_handler(ARGV)
+  end
+when "network"
+  case ARGV[1]
+  when "secrule"
+    network = NetworkClient.new
+    network.argsfunction = 'secrule'
+    puts network.request_handler(ARGV)
+  when "secapp"
+    network = NetworkClient.new
+    network.argsfunction = 'secapp'
+    puts network.request_handler(ARGV)
+  when "seclist"
+    network = NetworkClient.new
+    network.argsfunction = 'seclist'
+    puts network.request_handler(ARGV)
+  when "secassoc"
+    network = NetworkClient.new
+    network.argsfunction = 'secassoc'
+    puts network.request_handler(ARGV)
+  when "seciplist"
+    network = NetworkClient.new
+    network.argsfunction = 'seciplist'
+    puts network.request_handler(ARGV)
+  when "ip_reservation", "ip_association"
+    network = NetworkClient.new
+    network.argsfunction = 'ip_reservation', 'ip_association'
+    puts network.request_handler(ARGV)
+  when "ssh_key"
+    network = NetworkClient.new
+    network.argsfunction = 'ssh_key'
+    puts network.request_handler(ARGV)
+  when "ipnetwork"
+    network = NetworkClient.new
+    network.argsfunction = 'ipnetwork'
+    puts network.request_handler(ARGV) 
+  else
+    puts 'correct values are: secrule, secapp, seclist, secassoc, seciplist, ip_reservation, ip_association, ssh_key'
+  end
+when "bmc"
+  case ARGV[1]
+  when "instance"
+    bmc = InstanceClient.new
+	puts bmc.request_handler(ARGV)
+  when "vcn"
+  	vnc = VncClient.new
+  	puts vnc.request_handler(ARGV)
+  when "blockstorage"
+	bstorage = BmcBlockStorageClient.new
+	puts bstorage.request_handler(ARGV)
+  else
+  	puts 'correct values are: instance, vnc, storage, orchestration'
+  end
+when "objectstorage"
+  storage = ObjectStorageClient.new
+  puts storage.request_handler(ARGV)
+else
+  puts 'correct values are: compute, network, bmc, blockstorage, paas, objectstorage'
+end
+  
+

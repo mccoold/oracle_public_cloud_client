@@ -1,5 +1,0 @@
-#! /usr/bin/ruby
-require 'opc_client'
-paas = PaasClient.new
-paas.action = 'delete'
-puts paas.request_handler(ARGV)

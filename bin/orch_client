@@ -1,4 +1,0 @@
-#! /usr/bin/ruby
-require 'opc_client'
-orch = OrchClient.new
-puts orch.request_handler(ARGV)

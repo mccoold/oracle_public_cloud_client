@@ -14,19 +14,14 @@
 # limitations under the License.
 #
 #
-class OpcClient
-  require 'opc_client/utilities'
-  require 'optparse'
-  require 'opc_client/nimbula_client'
-  require 'opc_client/validator'
-  # the next section is to either enable or disable the oraclebmi gem, that gem has a 
-  # dependency on typhoeus which does not install well on windows at all
-  # this flag allows users to choose, the default position in this release is false
-  enable = {}
-  @util = Utilities.new
-  @util.config_file_reader(enable)
-  enable[:bmcenable] = 'false' unless enable[:bmcenable]
-  if enable[:bmcenable] == 'true'
-    require 'opc_client/bmc_client'
-  end
+class BmcClient < OpcClient
+  require 'oraclebmc'
+  require 'yaml'
+  require 'opc_client/bmc/instance_client'
+  require 'opc_client/bmc/bmcinputparser'
+  require 'opc_client/bmc/authenticate'
+  require 'opc_client/bmc/attr_finder'
+  require 'opc_client/bmc/vcn_client'
+  require 'opc_client/bmc/identity_client'
+  require 'opc_client/bmc/bmc_blockstorage_client.rb'
 end

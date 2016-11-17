@@ -1,4 +1,0 @@
-#! /usr/bin/ruby
-require 'opc_client'
-enc_object = Utilities.new
-puts env_object.encrypt_content_upload(ARGV)

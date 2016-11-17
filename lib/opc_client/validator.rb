@@ -13,22 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-class Validator < OpcClient
+class Validator < NimbulaClient
   def attrvalidate(options, attrcheck)  # rubocop:disable Metrics/AbcSize
-    if options[:id_domain].nil?
-      abort('id domain is null, it can not be empty. use -h flag for list of arguements')
-    elsif options[:passwd].nil?
-      abort('password is null, it can not be empty. use -h flag for list of arguements')
-    elsif options[:user_name].nil?
-      abort('user name is null, it can not be empty. use -h flag for list of arguements')
-    elsif !attrcheck.nil?
-      attrcheck.each do |key, attr|
-        next unless attr.nil?
-        abort(key + ' is null, it can not be empty. use -h flag for list of arguements')
-      end # end of loop
-      validateresponse = 'passed validator'
-    else
-      validateresponse = 'passed validator'
-    end # end of if
-  end # end of method
+    attrcheck['id_domain'] = options[:id_domain]
+    attrcheck['password']  = options[:passwd]
+    attrcheck['user_name']  = options[:user_name]
+    validate(options, attrcheck)
+  end
+  
+  def validate(options, attrcheck)
+    if !attrcheck.nil?
+          attrcheck.each do |key, attr|
+            next unless attr.nil?
+            abort(key + ' is null, it can not be empty. use -h flag for list of arguements')
+          end
+    end
+  end
 end

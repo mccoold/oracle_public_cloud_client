@@ -1,4 +1,0 @@
-#! /usr/bin/ruby
-require 'opc_client'
-network = Network.new
-network.input(ARGV)
