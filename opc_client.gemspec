@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
   s.license = 'Apache-2.0'
   s.required_ruby_version = '>= 1.8'
-  s.add_dependency('OPC', '>= 0.3.4')
+  s.add_dependency('OPC', '>= 0.4.0')
   s.add_dependency('json')
   s.executables = ['jcsmanage', 'opc', 'dbcsmanage']        
   s.rubygems_version = %q{1.6.2}

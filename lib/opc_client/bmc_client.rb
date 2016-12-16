@@ -23,5 +23,6 @@ class BmcClient < OpcClient
   require 'opc_client/bmc/attr_finder'
   require 'opc_client/bmc/vcn_client'
   require 'opc_client/bmc/identity_client'
+  require 'opc_client/bmc/ecosystem'
   require 'opc_client/bmc/bmc_blockstorage_client.rb'
 end

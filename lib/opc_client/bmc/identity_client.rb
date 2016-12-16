@@ -3,10 +3,9 @@ class IdentityClient < BmcClient
   def request_handler(args) # rubocop:disable Metrics/AbcSize
     inputparse =  BmcInputParser.new(args)
     @options = inputparse.bmc('vncclient')
-    attrcheck = { 'fingerprint'       => @options[:fingerprint],
-                  'tenancy'        => @options[:tenancy],
-                  'key_file'  => @options[:key_file]
-                  # 'Container'     => @options[:container] 
+    attrcheck = { 'fingerprint'  => @options[:fingerprint],
+                  'tenancy'      => @options[:tenancy],
+                  'key_file'     => @options[:key_file] 
     }
     @validate = Validator.new
     @validate.validate(@options, attrcheck)

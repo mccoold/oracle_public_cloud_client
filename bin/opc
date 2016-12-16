@@ -29,7 +29,7 @@ when "paas"
     puts paas.request_handler(ARGV)
   when "dbcs"
     paas = PaasClient.new
-    paas.argsfunction = 'jcs'
+    paas.argsfunction = 'dbcs'
     puts paas.request_handler(ARGV)
   when "soa"
     paas = PaasClient.new
@@ -62,9 +62,13 @@ when "network"
     network = NetworkClient.new
     network.argsfunction = 'seciplist'
     puts network.request_handler(ARGV)
-  when "ip_reservation", "ip_association"
+  when 'ip_association'
     network = NetworkClient.new
-    network.argsfunction = 'ip_reservation', 'ip_association'
+    network.argsfunction = 'ip_association'
+    puts network.request_handler(ARGV)
+  when 'ip_reservation'
+    network = NetworkClient.new
+    network.argsfunction = 'ip_reservation'
     puts network.request_handler(ARGV)
   when "ssh_key"
     network = NetworkClient.new
@@ -81,21 +85,45 @@ when "bmc"
   case ARGV[1]
   when "instance"
     bmc = InstanceClient.new
-	puts bmc.request_handler(ARGV)
-  when "vcn"
-  	vnc = VncClient.new
-  	puts vnc.request_handler(ARGV)
+	bmc.request_handler(ARGV)
+  when 'stack'
+  	eco = EcoSystem.new
+  	eco.request_handler(ARGV)
+  when 'network'
+  	case ARGV[2]
+  	when 'gateway'
+  	  gw = InternetGateway.new
+  	  gw.request_handler(ARGV)
+  	when 'subnet'
+  	  sub = SubnetClient.new
+  	  sub.request_handler(ARGV)
+  	when 'route'
+  	  rt = RouteClient.new
+  	  rt.request_handler(ARGV)
+  	when 'security_list'
+  	  sl = SecurityListClient.new
+  	  sl.action = 'security_lists'
+  	  sl.request_handler(ARGV)
+  	when 'vcn'
+  	  vcn = VcnClient.new
+  	  vcn.request_handler(ARGV)
+  	when 'dhcpoptions'
+  	  vcn = DHCPClient.new
+  	  vcn.request_handler(ARGV)
+  	else
+  	puts 'correct values are: vcn, subnet, security_list, route, dhcpoptions, and gateway'
+  	end
   when "blockstorage"
 	bstorage = BmcBlockStorageClient.new
-	puts bstorage.request_handler(ARGV)
+	bstorage.request_handler(ARGV)
   else
-  	puts 'correct values are: instance, vnc, storage, orchestration'
+  	puts 'correct values are: instance, network, blockstorage, stack'
   end
 when "objectstorage"
   storage = ObjectStorageClient.new
   puts storage.request_handler(ARGV)
 else
-  puts 'correct values are: compute, network, bmc, blockstorage, paas, objectstorage'
+  puts 'correct values are: compute, network, bmc, blockstorage, paas, orchestration, and objectstorage'
 end
   
 

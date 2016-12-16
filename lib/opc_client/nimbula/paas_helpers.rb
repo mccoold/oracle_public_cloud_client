@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 class PaasHelpers < NimbulaClient
-  # create monitor method for paas calls
+  # create monitor method for paas calls, the options array, createcall object and the function are passed in
   def create_result(options, createcall, function)  # rubocop:disable Metrics/AbcSize
       status_object = function.create_status(createcall['location'])
       status_message =  status_object.body # have to break all the calls out for error handling,
@@ -45,11 +45,12 @@ class PaasHelpers < NimbulaClient
         puts JSON.pretty_generate(JSON.parse(result.body))
       end 
     end 
-    
-  def paas_url(options) # rubocop:disable Metrics/AbcSize
-    full_url = options[:paas_rest_endpoint] + '/paas/service/jcs/api/v1.1/instances/' + options[:id_domain] if options[:function] == 'jcs'
-    full_url = options[:paas_rest_endpoint] + '/paas/service/dbcs/api/v1.1/instances/' + options[:id_domain] if options[:function] == 'dbcs'
-    full_url = options[:paas_rest_endpoint] + 'paas/service/soa/api/v1.1/instances/' + options[:id_domain] if options[:function] == 'soa'
-    return full_url
+
+    # sets the various URL's for services, USA based all others require the paas_url options to be passed
+    def paas_url(options) # rubocop:disable Metrics/AbcSize
+      full_url = options[:paas_rest_endpoint] + '/paas/service/jcs/api/v1.1/instances/' + options[:id_domain] if options[:function] == 'jcs'
+      full_url = options[:paas_rest_endpoint] + '/paas/service/dbcs/api/v1.1/instances/' + options[:id_domain] if options[:function] == 'dbcs'
+      full_url = options[:paas_rest_endpoint] + 'paas/service/soa/api/v1.1/instances/' + options[:id_domain] if options[:function] == 'soa'
+      return full_url
+    end
   end
-end

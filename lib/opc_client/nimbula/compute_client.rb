@@ -14,16 +14,19 @@
 # limitations under the License
 #
 class ComputeClient < NimbulaClient
-  # Request Handler is for command line calls
-  # handles functions then hands off to an option_parse method for the action
-  def request_handler(args) # rubocop:disable Metrics/AbcSize
-    inputparse = InputParse.new(args)
-    @options = inputparse.compute('compute')
-    @options[:function] = @argsfunction if @argsfunction
+  require 'opc_client/nimbula/helpers'
+  include NimbulaHelpers::NimCommandLine 
+  
+  def initialize
     @util = Utilities.new
-    attrcheck = { 'Action'  => @options[:action],
-                  'Service' => @options[:function] }
     @validate = Validator.new
+  end
+ # primary option parsing for this class
+  def optparse
+    attrcheck = { 
+                  'Action'  => @options[:action],
+                  'Service' => @options[:function] 
+    }
     @validate.attrvalidate(@options, attrcheck)
     case @options[:function].downcase
     when 'instance', 'inst_snapshot'
@@ -52,7 +55,7 @@ class ComputeClient < NimbulaClient
     end
   end
   
-  # parses action for image list 
+  # parses actions for imagelists  
   def option_parse_imagelist
     case @options[:action].downcase
     when 'list', 'details'
@@ -88,7 +91,7 @@ class ComputeClient < NimbulaClient
 
   attr_writer :options, :util, :validate, :argsfunction
 
-  # list method for instances and inst_snapshot
+  # list method for instances and inst_snapshot, returns JSON object
   def list # rubocop:disable Metrics/AbcSize
     attrcheck = {
       'REST end point'  => @options[:rest_endpoint],
@@ -101,7 +104,7 @@ class ComputeClient < NimbulaClient
     return JSON.pretty_generate(JSON.parse(instanceconfig.body))
   end
   
-  # list method of image lists
+  # list method of imagelists, returns JSON object
   def image_list # rubocop:disable Metrics/AbcSize
     attrcheck = {
       'REST end point'  => @options[:rest_endpoint],
@@ -115,7 +118,7 @@ class ComputeClient < NimbulaClient
     return JSON.pretty_generate(JSON.parse(instanceconfig.body))
   end 
   
-  # create method for machine images
+  # create method for machine images, returns JSON object if created, aborts if not
   def image_create # rubocop:disable Metrics/AbcSize
     attrcheck = {
       'REST end point'  => @options[:rest_endpoint],
@@ -131,7 +134,7 @@ class ComputeClient < NimbulaClient
     return JSON.pretty_generate(JSON.parse(instanceconfig.body))
   end
 
-  # list method for machine images
+  # list method for machineimages, returns JSON object
   def machineimage_list # rubocop:disable Metrics/AbcSize
     attrcheck = {
       'REST end point'  => @options[:rest_endpoint],
@@ -145,7 +148,7 @@ class ComputeClient < NimbulaClient
     return JSON.pretty_generate(JSON.parse(instanceconfig.body))
   end
 
-  # create method for machine images
+  # create method for machine images, returns JSON object
   def machineimage_create # rubocop:disable Metrics/AbcSize
     attrcheck = {
       'REST end point'  => @options[:rest_endpoint],
@@ -175,7 +178,7 @@ class ComputeClient < NimbulaClient
     puts 'deleted' if instancedelete.code == '204'
   end
 
-  # list method for shapes
+  # list method for shapes, returns JSON object
   def shape_list # rubocop:disable Metrics/AbcSize
     attrcheck = {
       'REST end point'  => @options[:rest_endpoint],
@@ -189,7 +192,7 @@ class ComputeClient < NimbulaClient
   end
 
   # method to find the external IP for instances
-  def list_ip # rubocop:disable Metrics/AbcSize
+  def list_ip # rubocop:disable Metrics/AbcSize, returns an array of IP's
     attrcheck = {
       'REST end point'  => @options[:rest_endpoint],
       'Container'       => @options[:container]

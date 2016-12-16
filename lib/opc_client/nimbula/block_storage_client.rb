@@ -13,24 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License
 #
+# client to manage block storage on the Nimbula cloud
 class BlockStorageClient < NimbulaClient
-  # client to manage block storage on the Nimbula cloud
+  require 'opc_client/nimbula/helpers'
+  include NimbulaHelpers::NimCommandLine
   
-  # handles requests from the command line
-  def request_handler(args)
-    inputparse = InputParse.new(args)
-    @options = inputparse.compute('compute')
-    option_parse
+  def intialize
+    @util = Utilities.new
+    @validate = Validator.new
   end
 
   # parses action option to determine the correct method to be called for the request
   def option_parse
-    @util = Utilities.new
     attrcheck = {
       'Action'         => @options[:action],
       'REST endpoint'  => @options[:rest_endpoint]
     }
-    @validate = Validator.new
     @validate.attrvalidate(@options, attrcheck)
     case @options[:action].downcase
     when 'create'

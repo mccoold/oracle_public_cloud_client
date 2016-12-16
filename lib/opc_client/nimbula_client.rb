@@ -16,25 +16,22 @@
 #
 class NimbulaClient < OpcClient
   require 'OPC'
+  # PaaS classes
   require 'opc_client/nimbula/jcs_client'
-  require 'opc_client/nimbula/iputil_client'
-  require 'opc_client/nimbula/seclist_client'
-  require 'opc_client/nimbula/seciplist_client'
-  require 'opc_client/nimbula/secassoc_client'
   require 'opc_client/nimbula/paas_client'
-  require 'opc_client/nimbula/object_storage_client'  
   require 'opc_client/nimbula/datagrid_client'
-  require 'opc_client/nimbula/network_client'
-  require 'opc_client/nimbula/dbcs_client'
-  require 'opc_client/nimbula/orch_client'
   require 'opc_client/nimbula/backupmgr_client'
-  require 'opc_client/nimbula/inputparse'
-  require 'opc_client/nimbula/compute_client'
-  require 'opc_client/nimbula/secrule_client'
+  require 'opc_client/nimbula/dbcs_client'
   require 'opc_client/nimbula/paas_helpers'
-  require 'opc_client/nimbula/secapp_client'
+  # IaaS classes
+  require 'opc_client/nimbula/object_storage_client'
   require 'opc_client/nimbula/block_storage_client'
+  require 'opc_client/nimbula/network_client'
+  require 'opc_client/nimbula/networkutil'
+  require 'opc_client/nimbula/orch_client'
+  require 'opc_client/nimbula/inputparse'
+  require 'opc_client/nimbula/helpers'
+  require 'opc_client/nimbula/compute_client'
   require 'opc_client/nimbula/sshkey_client'
-  require 'opc_client/nimbula/ipnetwork_client'
 end
  

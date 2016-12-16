@@ -1,38 +1,20 @@
+# controls operations for block storage on the next gen cloud
 class BmcBlockStorageClient < BmcClient
-  def request_handler(args) # rubocop:disable Metrics/AbcSize
-    inputparse =  BmcInputParser.new(args)
-    @options = inputparse.bmc('instanceclient')
-    attrcheck = { 'fingerprint'       => @options[:fingerprint],
-                  'tenancy'        => @options[:tenancy],
-                  'key_file'  => @options[:key_file]
-                  # 'Container'     => @options[:container] 
-    }
-    if @options[:yaml]
-      @instanceparameters = inputparse.yaml_reader(@options[:yaml])
-    elsif @options[:json]
-      @instnaceparameters = json_reader
-    end
+  def initialize
     @validate = Validator.new
-    @validate.validate(@options, attrcheck)
-    case @options[:action]
-    when 'create'
-      
-#      puts @instanceparameters
-#      puts 'next'
-      @instanceparameters = @instanceparameters['storage'].at(0)
-#        puts @instanceparameters
-      create
-    when 'list'
-      inputparse.formatter(list)
-    when 'delete'
-      delete
-    end
+    @action = 'storage'
   end
+
+  require 'opc_client/bmc/helpers'
+  include BmcHelpers::CommandLine
+  include BmcHelpers::OptParsing
+
+  attr_writer :options, :validate, :instanceparameters
 
   # create new storage volumes on the Oracle Next Gen cloud
   def create
     instance_details = AttrFinder.new(@instanceparameters)
-    instance_details.options=(@options)
+    instance_details.options = @options
     instance_details.validate = @validate
     instance_details.function = 'volume'
     BmcAuthenticate.new(@options)
@@ -44,11 +26,11 @@ class BmcBlockStorageClient < BmcClient
     api = OracleBMC::Core::BlockstorageClient.new
     response = api.create_volume(request)
     instance_id = response.data.id
-    response = api.get_volume(instance_id).wait_until(:lifecycle_state, OracleBMC::Core::Models::Volume::LIFECYCLE_STATE_RUNNING)
+    api.get_volume(instance_id).wait_until(:lifecycle_state, OracleBMC::Core::Models::Volume::LIFECYCLE_STATE_AVAILABLE)
   end
-    
+
   def list
-    attrcheck = {'compartment' => @options[:compartment]}
+    attrcheck = { 'compartment' => @options[:compartment] }
     @validate.validate(@options, attrcheck)
     opts = {}
     opts[:availability_domain] = @options[:availability_domain] if @options[:availability_domain]
@@ -58,11 +40,14 @@ class BmcBlockStorageClient < BmcClient
     request = request.list_volumes(@options[:compartment], opts)
     request.data
   end
-    
+
   def delete
+    inst_details = AttrFinder.new(@instanceparameters)
+    inst_details.options = @options
+    inst_details.validate = @validate
     opts = {}
     BmcAuthenticate.new(@options)
     request = OracleBMC::Core::BlockstorageClient.new
-    request.delete_volume(@options[:inst], opts)
-    end
+    request.delete_volume(inst_details.volume, opts)
+  end
 end

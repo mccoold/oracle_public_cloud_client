@@ -14,17 +14,18 @@
 # limitations under the License
 #
 class NetworkClient < NimbulaClient
-  # Request Handler is for command line calls, this method is used for all Nimbula network operations
-  def request_handler(args) # rubocop:disable Metrics/AbcSize
-    inputparse = InputParse.new(args)
-    @options = inputparse.compute('networkclient')
-    @options[:function] = @argsfunction if @argsfunction
-    attrcheck = {
-      'Service'       => @options[:function],
-      'Action'        => @options[:action],
-      'RestEndPoint'  => @options[:rest_endpoint]
-    }
+  require 'opc_client/nimbula/helpers'
+  include NimbulaHelpers::NimCommandLine 
+  def initialize
     @validate = Validator.new
+  end
+  
+  def optparse
+    attrcheck = {
+          'Service'       => @options[:function],
+          'Action'        => @options[:action],
+          'RestEndPoint'  => @options[:rest_endpoint]
+        }
     @validate.attrvalidate(@options, attrcheck)
     case @options[:function].downcase
     when 'secrule'
@@ -89,6 +90,7 @@ class NetworkClient < NimbulaClient
       end
     when 'ip_reservation', 'ip_association'
       iputilc = IPUtilClient.new
+      @options[:function] = @argsfunction
       iputilc.options = @options
       case @options[:action].downcase
       when 'list', 'details'

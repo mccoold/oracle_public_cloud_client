@@ -15,16 +15,14 @@
 #
 class PaasClient < NimbulaClient
   
-  # Request Handler is for command line calls
-  def request_handler(args) # rubocop:disable Metrics/AbcSize
-    inputparse =  InputParse.new(args)
-    @options = inputparse.paas
-    @options[:function] = @argsfunction if @argsfunction
-    attrcheck = { 'Service'  => @options[:function],
-                  'Action'   => @options[:action]
-    }
+  require 'opc_client/nimbula/helpers'
+  include NimbulaHelpers::NimCommandLine
+  
+  def intialize
     @validate = Validator.new
-    @validate.attrvalidate(@options, attrcheck)
+  end
+    
+  def optparse
     @util = Utilities.new
     case @options[:action]
     when 'create'

@@ -22,7 +22,8 @@ class Utilities < OpcClient
   def config_file_reader(options)
     file_values = config_file
     if !file_values.nil?
-      values = { 
+      values = {
+        'bmcenable'          => :bmcenable,
         'id_domain'          => :id_domain,
         'user_name'          => :user_name,
         'rest_endpoint'      => :rest_endpoint,
@@ -30,7 +31,6 @@ class Utilities < OpcClient
         'tenancy'            => :tenancy,
         'key_file'           => :key_file,
         'fingerprint'        => :fingerprint,
-        'bmcenable'          => :bmcenable,
         'debug'              => :debug,
         'bmc_user'           => :user,
         'region'             => :region,

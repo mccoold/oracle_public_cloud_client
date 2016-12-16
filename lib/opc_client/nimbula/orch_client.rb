@@ -25,13 +25,17 @@ class OrchClient < NimbulaClient
   # this is the method for when being called from command line
   # you would not call this method directly
   
-  def request_handler(args) # rubocop:disable Metrics/AbcSize
-    inputparse =  InputParse.new(args)
-    @options = inputparse.compute('orch')
-    attrcheck = { 'Action'        => @options[:action],
-                  'REST endpoint' => @options[:rest_endpoint] }
+  require 'opc_client/nimbula/helpers'
+  include NimbulaHelpers::NimCommandLine
+  
+  def initialize
     @validate = Validator.new
     @util = Utilities.new
+  end
+  
+  def optparse
+    attrcheck = { 'Action'        => @options[:action],
+                  'REST endpoint' => @options[:rest_endpoint] }
     @validate.attrvalidate(@options, attrcheck)
     @orch = Orchestration.new(@options)
     case @options[:action]
@@ -84,8 +88,8 @@ class OrchClient < NimbulaClient
     orch_event = @orch.manage(@options[:action])
     @util.response_handler(orch_event)
     if @options[:track]
-      puts 'starting' + @options[:container] if @options[:action] == 'start'
-      puts 'stopping' + @options[:container] if @options[:action] == 'stop'
+      puts 'starting ' + @options[:container] if @options[:action] == 'start'
+      puts 'stopping ' + @options[:container] if @options[:action] == 'stop'
       statusresponse = JSON.parse(orch_event.body)
       if @options[:action] == 'start'
         until statusresponse['status'] == 'ready'
